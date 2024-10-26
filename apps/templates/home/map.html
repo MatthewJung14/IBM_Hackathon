@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Florida Map with Markers</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
+        integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
+        crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
+        integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg="
+        crossorigin=""></script>
+    <style>
+        #map { height: 500px; }
+    </style>
+</head>
+<body data-rsssl=1>
+
+<main>
+    <div id="map"></div>
+</main>
+
+<script type="module">
+    import Locations from './locations.js';
+
+    const map = L.map('map').setView([27.9944024, -81.7602544], 7); // Centered on Florida
+
+    // Map tile layer
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // Marker options for different colors
+    const donationIcon = new L.Icon({
+        iconUrl: 'https://cdn.mapmarker.io/api/v1/pin?size=50&background=%23ff0000&icon=fa-map-marker&color=%23ffffff',
+        iconSize: [30, 30],
+        iconAnchor: [15, 30]
+    });
+
+    const neededIcon = new L.Icon({
+        iconUrl: 'https://cdn.mapmarker.io/api/v1/pin?size=50&background=%230000ff&icon=fa-map-marker&color=%23ffffff',
+        iconSize: [30, 30],
+        iconAnchor: [15, 30]
+    });
+
+    // Get donation locations and add them to the map
+    const locations = Locations.getDonationLocations();
+    locations.forEach(location => {
+        L.marker(location.coords, { icon: donationIcon }).addTo(map)
+            .bindPopup(location.name);
+    });
+
+    // Get needed locations and add them to the map
+    const neededLocations = Locations.getNeededLocations();
+    neededLocations.forEach(location => {
+        L.marker(location.coords, { icon: neededIcon }).addTo(map)
+            .bindPopup(location.name);
+    });
+</script>
+
+</body>
+</html>
