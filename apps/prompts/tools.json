@@ -1,0 +1,719 @@
+{
+    "Chainsaws": [
+        "hurricanes",
+        "flooding",
+        "earthquakes",
+        "wildfires",
+        "tornadoes"
+    ],
+    "Wet-Dry Vacuums": [
+        "flooding",
+        "hurricanes"
+    ],
+    "Pumps": [
+        "flooding",
+        "hurricanes",
+        "wildfires"
+    ],
+    "Jacks": [
+        "earthquakes"
+    ],
+    "Braces": [
+        "earthquakes"
+    ],
+    "Hazard Assessment Kits": [
+        "hurricanes",
+        "flooding",
+        "earthquakes", 
+        "tornadoes",
+        "volcanic eruptions"
+    ],
+    "Drones": [
+        "hurricanes",
+        "flooding",
+        "wildfires",
+        "tornadoes"
+    ],
+    "Electric Generators": [
+        "hurricanes",
+        "flooding",
+        "heat waves",
+        "blizzards"
+    ],
+    "Gas generators": [
+        "hurricanes",
+        "flooding",
+        "blizzards"
+    ],
+    "Pickaxe": [
+        "earthquakes"
+    ],
+    "Mega Phone": [
+        "wildfires"
+    ],
+    "Blankets": [
+        "hurricanes",
+        "blizzards",
+        "heat waves"
+    ],
+    "Cots": [
+        "hurricanes",
+        "blizzards",
+        "heat waves"
+    ],
+    "Sleeping Bags": [
+        "hurricanes",
+        "blizzards",
+        "heat waves"
+    ],
+    "First aid supplies": [
+        "hurricanes",
+        "flooding",
+        "earthquakes",
+        "wildfires",
+        "blizzards"
+    ],
+    "Trauma kits": [
+        "hurricanes",
+        "flooding",
+        "earthquakes"
+    ],
+    "Necessary medications": [
+        "hurricanes",
+        "flooding",
+        "heat waves"
+    ],
+    "Buckets": [
+        "flooding",
+        "wildfires"
+    ],
+    "Batteries": [
+        "hurricanes",
+        "heat waves",
+        "blizzards"
+    ],
+    "Digital Camera": [
+        "hurricanes",
+        "wildfires"
+    ],
+    "Cellular phone (w/ emergency numbers)": [
+        "hurricanes",
+        "wildfires",
+        "heat waves",
+        "blizzards"
+    ],
+    "Clothesline": [
+        "flooding"
+    ],
+    "Heavy packing string": [
+        "flooding"
+    ],
+    "Clothespins (rust proof)": [
+        "flooding"
+    ],
+    "Dehumidifiers": [
+        "flooding",
+        "heat waves"
+    ],
+    "Dish drying racks": [
+        "flooding"
+    ],
+    "Dry ice": [
+        "wildfires",
+        "heat waves"
+    ],
+    "Extension cords": [
+        "hurricanes",
+        "blizzards"
+    ],
+    "Window Fans": [
+        "heat waves"
+    ],
+    "Floor Fans": [
+        "heat waves"
+    ],
+    "First aid kit": [
+        "hurricanes",
+        "flooding",
+        "wildfires"
+    ],
+    "Flashlights": [
+        "hurricanes",
+        "blizzards",
+        "flooding"
+    ],
+    "Freezer or waxed paper": [
+        "heat waves"
+    ],
+    "Garbage bags": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Hoses": [
+        "flooding",
+        "wildfires"
+    ],
+    "Temperature Monitors": [
+        "heat waves"
+    ],
+    "Humidity Monitors": [
+        "heat waves"
+    ],
+    "Ladders": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Kickstands": [
+        "earthquakes"
+    ],
+    "Mat board": [
+        "hurricanes"
+    ],
+    "Microspatula": [
+        "flooding"
+    ],
+    "Moisture meter": [
+        "flooding"
+    ],
+    "Mops": [
+        "flooding"
+    ],
+    "Paper pads": [
+        "hurricanes"
+    ],
+    "Pencils": [
+        "hurricanes"
+    ],
+    "Water": [
+        "hurricanes",
+        "flooding",
+        "heat waves",
+        "blizzards"
+    ],
+    "Waterproof": [
+        "hurricanes",
+        "flooding",
+        "wildfires"
+    ],
+    "Pens/markers": [
+        "hurricanes"
+    ],
+    "Flipcharts": [
+        "hurricanes"
+    ],
+    "Large self-adhesive labels": [
+        "hurricanes"
+    ],
+    "Pallets": [
+        "flooding"
+    ],
+    "Paper towels": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Photo-Flo wetting agent": [
+        "wildfires"
+    ],
+    "Plastic bags": [
+        "hurricanes",
+        "flooding"
+    ], 
+    "Plastic polyethylene sheeting rolls": [
+        "hurricanes",
+        "flooding",
+        "wildfires"
+    ],
+    "Plastic trays": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Plexiglas sheets": [
+        "hurricanes",
+        "earthquakes"
+    ],
+    "Plywood": [
+        "hurricanes",
+        "flooding",
+        "wildfires",
+        "earthquakes"
+    ],
+    "Masonite board": [
+        "hurricanes",
+        "flooding",
+        "wildfires"
+    ],
+    "Polyester film": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Spunbond Polyester": [
+        "hurricanes",
+        "wildfires"
+    ],
+    "Book trucks": [
+        "hurricanes"
+    ],
+    "String": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Scissors": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Nylon Screens": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Shrinkwrap": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Silicone release paper": [
+        "hurricanes"
+    ],
+    "Sponges": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Foldable Tables": [
+        "hurricanes",
+        "blizzards",
+        "heat waves"
+    ],
+    "Masking Tape": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Packing Tape": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Duct Tape": [
+        "hurricanes",
+        "flooding",
+        "earthquakes"
+    ],
+    "Tool kit": [
+        "hurricanes",
+        "earthquakes",
+        "wildfires"
+    ],
+    "Crowbar": [
+        "earthquakes"
+    ],
+    "Hammer": [
+        "earthquakes",
+        "hurricanes"
+    ],
+    "Pliers": [
+        "earthquakes"
+    ],
+    "Screwdriver": [
+        "earthquakes"
+    ],
+    "Wire cutter": [
+        "earthquakes"
+    ],
+    "Towels": [
+        "hurricanes",
+        "flooding",
+        "heat waves"
+    ],
+    "Cotton Rags": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Utility knives": [
+        "hurricanes",
+        "flooding",
+        "wildfires"
+    ],
+    "HEPA Vacuum cleaner": [
+        "flooding",
+        "wildfires"
+    ],
+    "Wet vacuum": [
+        "flooding",
+        "hurricanes"
+    ],
+    "Air conditioners": [
+        "heat waves",
+        "hurricanes"
+    ],
+    "Barricade tape": [
+        "earthquakes",
+        "wildfires"
+    ],
+    "Blotting paper": [
+        "flooding"
+    ],
+    "Boxes": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Brooms and dustpans": [
+        "flooding",
+        "hurricanes"
+    ],
+    "Bristle Brushes": [
+        "flooding",
+        "hurricanes"
+    ],
+    "Lifebuoy": [
+        "flooding"
+    ],
+    "Life jacket": [
+        "flooding",
+        "hurricanes"
+    ],
+    "Face mask": [
+        "pandemics",
+        "wildfires"
+    ],
+    "Gas mask": [
+        "wildfires"
+    ],
+    "Hand gloves": [
+        "hurricanes",
+        "flooding",
+        "wildfires"
+    ],
+    "Gum boot": [
+        "flooding",
+        "wildfires"
+    ],
+    "Safety shoes": [
+        "earthquakes",
+        "wildfires"
+    ],
+    "Helmet": [
+        "earthquakes",
+        "wildfires"
+    ],
+    "Dragon light": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Emergency light": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Rappelling rope": [
+        "earthquakes",
+        "wildfires"
+    ],
+    "Climbing rope": [
+        "earthquakes",
+        "wildfires"
+    ],
+    "BOB ropes": [
+        "earthquakes"
+    ],
+    "Descenders": [
+        "earthquakes"
+    ],
+    "Ascenders": [
+        "earthquakes"
+    ],
+    "Water jel blanket": [
+        "wildfires"
+    ],
+    "Harness": [
+        "earthquakes"
+    ],
+    "Safety net": [
+        "earthquakes"
+    ],
+    "Hand tool set": [
+        "hurricanes",
+        "earthquakes"
+    ],
+    "Safety jacket": [
+        "earthquakes",
+        "wildfires"
+    ],
+    "Spad": [
+        "earthquakes"
+    ],
+    "Pump": [
+        "flooding",
+        "hurricanes"
+    ],
+    "Rolling carts": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Aprons": [
+        "wildfires"
+    ],
+    "Disposable Gloves": [
+        "hurricanes",
+        "flooding",
+        "wildfires"
+    ],
+    "Heavy Duty Gloves": [
+        "wildfires"
+    ],
+    "Hard hats": [
+        "earthquakes",
+        "wildfires"
+    ],
+    "Masks and respirators": [
+        "wildfires",
+        "pandemics"
+    ],
+    "Rubber boots": [
+        "flooding",
+        "wildfires"
+    ],
+    "Vest with pockets": [
+        "wildfires"
+    ],
+    "Goggles": [
+        "wildfires"
+    ],
+    "Check Dams": [
+        "flooding"
+    ],
+    "Brush Cutters": [
+        "wildfires"
+    ],
+    "Water Purification Systems": [
+        "flooding",
+        "pandemics"
+    ],
+    "Soil testing kit": [
+        "earthquakes"
+    ],
+    "Water testing kit": [
+        "flooding",
+        "pandemics"
+    ], 
+    "Hydroseeders": [
+        "wildfires",
+        "flooding"
+    ],
+    "Erosion Control Blankets": [
+        "wildfires",
+        "flooding"
+    ],
+    "Straw Wattles": [
+        "flooding"
+    ],
+    "Silt Fences": [
+        "flooding"
+    ],
+    "Mulching Machines": [
+        "wildfires"
+    ],
+    "Water Bars": [
+        "flooding"
+    ],
+    "Water trucks": [
+        "flooding",
+        "wildfires"
+    ],
+    "Tree Seedling Planters": [
+        "wildfires"
+    ],
+    "Aerial Seed Dispersal": [
+        "wildfires"
+    ],
+    "Tree Guards": [
+        "wildfires"
+    ],
+    "Soil Conditioners": [
+        "wildfires",
+        "flooding"
+    ],
+    "Fertilizers": [
+        "wildfires"
+    ],
+    "Nest Boxes": [
+        "wildfires"
+    ],
+    "Bulldozers": [
+        "wildfires",
+        "flooding"
+    ],
+    "Excavators": [
+        "wildfires",
+        "flooding"
+    ],
+    "Listening Devices": [
+        "earthquakes",
+        "hurricanes"
+    ],
+    "Rescue Ropes": [
+        "earthquakes",
+        "flooding"
+    ],
+    "Backhoes": [
+        "earthquakes",
+        "flooding",
+        "hurricanes"
+    ],
+    "Metal Cutters": [
+        "earthquakes",
+        "hurricanes"
+    ],
+    "Heavy-Duty Shovels": [
+        "earthquakes",
+        "flooding",
+        "hurricanes"
+    ],
+    "Rakes": [
+        "wildfires",
+        "flooding"
+    ],
+    "Dump Trucks": [
+        "flooding",
+        "earthquakes"
+    ],
+    "Wheel Loaders": [
+        "flooding",
+        "earthquakes"
+    ],
+    "Hydraulic Jacks": [
+        "earthquakes"
+    ],
+    "Fast-Drying Cement": [
+        "earthquakes"
+    ],
+    "Concrete Mixers": [
+        "earthquakes"
+    ],
+    "Laser Levels": [
+        "earthquakes"
+    ],
+    "Surveying Equipment": [
+        "earthquakes"
+    ],
+    "Bracing Kits": [
+        "earthquakes"
+    ],
+    "Shoring Kits": [
+        "earthquakes"
+    ],
+    "Tents": [
+        "hurricanes",
+        "flooding",
+        "earthquakes"
+    ],
+    "Tarps": [
+        "hurricanes",
+        "flooding"
+    ],
+    "Portable toilets": [
+        "flooding",
+        "earthquakes"
+    ],
+    "Hygiene kits": [
+        "flooding",
+        "earthquakes"
+    ],
+    "Rebar": [
+        "earthquakes"
+    ],
+    "Concrete": [
+        "earthquakes"
+    ],
+    "Wood": [
+        "earthquakes"
+    ], 
+    "Snow Plows": [
+        "blizzards",
+        "winter storms"
+    ],
+    "Snow Blowers": [
+        "blizzards",
+        "winter storms"
+    ],
+    "Ice Scrapers": [
+        "blizzards",
+        "winter storms"
+    ],
+    "Snow Shovels": [
+        "blizzards",
+        "winter storms"
+    ],
+    "Space Heaters": [
+        "blizzards",
+        "winter storms"
+    ],
+    "Firewood and Stoves": [
+        "blizzards",
+        "winter storms"
+    ],
+    "Winter Clothing": [
+        "blizzards",
+        "winter storms"
+    ],
+    "Ice Traction Devices": [
+        "blizzards",
+        "winter storms"
+    ],
+    "Headlamps": [
+        "blizzards",
+        "winter storms"
+    ],
+    "All-Terrain Vehicles (ATVs)": [
+        "blizzards",
+        "winter storms"
+    ],
+    "Snowmobiles": [
+        "blizzards",
+        "winter storms"
+    ],
+    "Ice Picks": [
+        "blizzards",
+        "winter storms"
+    ], 
+    "Respirators": [
+        "heat waves",
+        "wildfires",
+        "pandemics"
+    ],
+    "Oxygen Masks": [
+        "wildfires",
+        "heat waves"
+    ],
+    "Face Shields": [
+        "pandemics",
+        "wildfires"
+    ],
+    "Safety Masks": [
+        "wildfires",
+        "heat waves",
+        "pandemics"
+    ],
+    "Portable Air Conditioners": [
+        "heat waves"
+    ],
+    "Misting Systems": [
+        "heat waves"
+    ],
+    "Evaporative Coolers": [
+        "heat waves"
+    ],
+    "Ice Packs": [
+        "heat waves",
+        "wildfires"
+    ],
+    "Cooling Towels": [
+        "heat waves"
+    ],
+    "Sun Protection": [
+        "heat waves"
+    ],
+    "Sunscreen": [
+        "heat waves"
+    ],
+    "Cooling Vests": [
+        "heat waves"
+    ],
+    "Fans": [
+        "heat waves"
+    ]
+}
