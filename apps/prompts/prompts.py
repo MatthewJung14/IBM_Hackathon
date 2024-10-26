@@ -20,6 +20,8 @@ model = ModelInference(
   }
 )
 
+user_input = "I want a generator, ladders, a few waters, and seven plastic trays. I would like to donate some Plywood."
+
 def obtain_tool_list(tools_file_path="tools.json"):
     with open(tools_file_path, 'r') as file:
         tools_data = json.load(file)
@@ -42,8 +44,6 @@ def obtain_JSON(model_output):
 
 def extract_tools():
     items_list = obtain_tool_list()
-
-    user_input = "I want a generator, ladders, a few waters, and seven plastic trays. I would like to donate some Plywood."
 
     prompt = f'''Analyze the user's intent based on the input text and respond with only one of the following JSON outputs, based on that intent.
     Limit items to those in this list: {items_list}.
@@ -71,4 +71,57 @@ def extract_tools():
 
     return obtain_JSON(model_output)
 
-extract_tools()
+def determine_action():
+    actions = [
+    "get news",
+    "view profile",
+    "logout",
+    "obtain safety checklist",
+    "preview requests",
+    "weather alerts",
+    "get/send help"
+    ]
+
+    prompt = f'''Based on the user's input, identify the action they want to take from the following list:
+
+    Actions:
+    - {', '.join(actions)}
+
+    User Input: "{user_input}"
+
+    Respond with the corresponding action only, without any additional explanations or context.
+    '''
+    action = model.generate_text(prompt).strip()
+    print(action)
+
+    if "get news" in action:
+        print("Action identified: get news")
+        # Add logic for getting news
+    if "view profile" in action:
+        print("Action identified: view profile")
+        # Add logic for viewing profile
+    if "logout" in action:
+        print("Action identified: logout")
+        # Add logic for logout
+    if "obtain safety checklist" in action:
+        print("Action identified: obtain safety checklist")
+        # Add logic for obtaining safety checklist
+    if "preview requests" in action:
+        print("Action identified: preview requests")
+        # Add logic for previewing requests
+    if "weather alerts" in action:
+        print("Action identified: weather alerts")
+        # Add logic for handling weather alerts
+    if "get/send help" in action:
+        extract_tools()
+        print("Action identified: get/send help")
+    else:
+        print("Unidentified action.")
+
+determine_action()
+
+def parseRequest(request):
+    #1, see what the request is
+    #2. execute each request and have ai chatbot respond to those requests
+    #3. store those responses in a a string array and return that
+    pass
