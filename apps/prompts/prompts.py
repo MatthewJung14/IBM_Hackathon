@@ -94,46 +94,54 @@ class UserActionHandler:
 
         Respond with the corresponding action only, without any additional explanations or context.
         '''
-        action = self.model.generate_text(prompt).strip()
-        print(action)
+        actions = self.model.generate_text(prompt).strip()
+        print(actions)
+
+        return actions
+
+    def handleActions(self, previous_request,actions):
         response_found = False
         responses =[]
 
-        if "get news" in action:
+        if "get news" in actions:
             print("Action identified: get news")
             response_found = True
             news_list = self.obtain_news_list()
-        if "view profile" in action:
+
+
+        if "view profile" in actions:
             print("Action identified: view profile")
             response_found = True
             # Add logic for viewing profile
-        if "logout" in action:
+        if "logout" in actions:
             print("Action identified: logout")
             response_found = True
             # Add logic for logout
-        if "obtain safety checklist" in action:
+        if "obtain safety checklist" in actions:
             print("Action identified: obtain safety checklist")
             response_found = True
             # Add logic for obtaining safety checklist
-        if "preview requests" in action:
+        if "preview requests" in actions:
             print("Action identified: preview requests")
             response_found = True
             # Add logic for previewing requests
-        if "weather alerts" in action:
+        if "weather alerts" in actions:
             print("Action identified: weather alerts")
-            response_found = True
             # Add logic for handling weather alerts
-        if "help" in action:
-            response_found = True
-            responses.append(self.extract_tools(user_request))
+        if "help" in actions:
             print("Action identified: get/send help")
+            responses.append(self.extract_tools(previous_request))
         if response_found == False:
             print("Unidentified action.")
 
         for response in responses:
             print(response)
 
-        return responses
+    def generateResponses(self, user_request)->list[int,str]:
+        actions = self.determine_action(user_request)
+        results=self.handleActions(user_request, actions)
+
+        return results
 
     def get_location(self, user_request):
         prompt = f'''Based on the user's input, if there is a location, return location.

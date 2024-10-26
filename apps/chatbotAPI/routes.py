@@ -2,6 +2,9 @@
 
 from flask import render_template, redirect, request, url_for, session, current_app, jsonify
 from apps.chatbotAPI import blueprint
+from apps.prompts.prompts import UserActionHandler
+
+userActionHandler = UserActionHandler()
 
 # Hypothetical function that processes the input string
 def process_message(input_string: str) -> list:
