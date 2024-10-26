@@ -40,15 +40,14 @@ def get_news():
     with open('news.json', 'r') as file:
         news_list = json.load(file)
 
-    prompt = (f"Create a 20 word short summary about the news from all the titles and descriptions in the articles in the JSON files (Do not describe the json file and At the end insert a new line and print 'To get more news Click <newsButton>'): {news_list},"
-              )
+    prompt = (f"Create a 20 word short summary about the news from all the titles and descriptions in the articles in the JSON files (Do not describe the json file or quote anything from it): {news_list},")
 
     result_paragraph = model.generate_text(prompt)
     # Wrap the text to a width of 50 characters per line
     wrapped_text = textwrap.fill(result_paragraph, width=50)
 
     # Print the formatted text
-    print(wrapped_text)
+    print(wrapped_text + "\nTo get more news Click <newsButton>")
 
 
 
