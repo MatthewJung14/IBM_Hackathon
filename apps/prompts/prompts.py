@@ -9,7 +9,7 @@ user_input = "I want a generator, ladders, a few waters, and seven plastic trays
 #user_input = "I want to donate a ladder."
 
 class UserActionHandler:
-    def __init__(self, api_key, project_id, model_id="ibm/granite-13b-chat-v2", url="https://us-south.ml.cloud.ibm.com"):
+    def __init__(self, api_key, project_id, model_id="ibm/granite-3-8b-instruct", url="https://us-south.ml.cloud.ibm.com"):
         # Set up credentials and model inference instance
         credentials = Credentials(url=url, api_key=api_key)
         client = APIClient(credentials)
@@ -141,15 +141,14 @@ class UserActionHandler:
     def get_location(self, user_request):
         prompt = f'''Based on the user's input, if there is a location, return location.
         User Input: "{user_request}"
-        Respond only with the location if a location was provided, or "false" if it was not. 
+        Respond only with the location: "location name" and if a location was provided, or "false" if it was not. 
         No additional context, explanations, or code should be included.
         '''
         response = self.model.generate_text(prompt).strip()  # Get the model's response
-
-        location_match = re.search(r'\b(?:in|at|located in)\s*([A-Z][a-zA-Z\s]+)', response)
+        print(response)
         
-        if location_match:
-            return location_match.group(1).strip()  # Return the extracted location
+        if "false" not in response:
+            return response  # Return the extracted location
         else:
             return "No location."
 
