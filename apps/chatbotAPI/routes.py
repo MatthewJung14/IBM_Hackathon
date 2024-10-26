@@ -12,11 +12,35 @@ def process_message(input_string: str) -> list:
     Processes the input string and returns a list of tuples containing strings and integers.
 
     :param input_string: The input message to process.
-    :return: A list of tuples, each containing a string and an integer.
+    :return: A list of tuples, each containing a string and a string.
     """
-    # Placeholder implementation
-    # Replace this with the actual logic as needed
-    return [("response1", 1), ("response2", 2), ("response3", 3)]
+    tasks=userActionHandler.generateTasks(input_string)
+    wanted_needed_items=[]
+
+    responses=[]
+
+    for task in tasks:
+        if task == "get/send help":
+            wanted_needed_items = userActionHandler.extract_tools(input_string)
+            print(wanted_needed_items)
+        elif task == "view profile":
+            responses.append(
+                ("👋 Hey! Want to check out your profile or make some changes? Click here <profileLink>! 😊",
+                 task))
+        elif task == "logout":
+            responses.append((
+                "🚪 Time to log out? You can click the logout button on the left (it's the running person 🏃‍♂️) or click here <logoutLink>!",
+                task))
+        elif task == "obtain safety checklist":
+            responses.append((
+                "🌟 Stay safe! Check out <safetyChecklistLink> for tips on how to keep yourself safe and sound 🙏",
+                task))
+        elif task == "weather alerts":
+            responses.append((
+                "⛈️ Oh no! The hurricane is still headed your way! Stay updated and check out <weatherLink> for more info 🌪️",
+                task))
+
+    return responses
 
 
 @blueprint.route('/message', methods=['POST'])
@@ -62,14 +86,14 @@ def handle_message():
         for item in processed_data:
             if not (isinstance(item, tuple) and len(item) == 2):
                 return jsonify({"error": "Each item in processed data must be a tuple of (string, int)"}), 500
-            if not isinstance(item[0], str) or not isinstance(item[1], int):
-                return jsonify({"error": "Each tuple must contain a string and an integer"}), 500
+            if not isinstance(item[0], str) or not isinstance(item[1], str):
+                return jsonify({"error": "Each tuple must contain a pair of strings"}), 500
 
         # Structure the response data
         response = {
             "status": "Message processed successfully",
             "results": [
-                {"text": text, "number": number} for text, number in processed_data
+                {"text": text, "type": type} for text, type in processed_data
             ]
         }
 

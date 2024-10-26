@@ -17,6 +17,5 @@ Flask-Minify==0.37
 
 ibm_watsonx_ai
 kinde-python-sdk
+flask-session
 
-# flask_mysqldb
-# psycopg2-binary

@@ -16,6 +16,9 @@ class UserActionHandler:
             project_id=project_id,
             params={"max_new_tokens": 100}
         )
+        self.possible_actions=["get news", "view profile", "logout",
+                               "obtain safety checklist","preview requests",
+                               "weather alerts","get/send help"]
 
     def obtain_tool_list(self, tools_file_path="tools.json"):
         with open(tools_file_path, 'r') as file:
@@ -75,18 +78,8 @@ class UserActionHandler:
         return self.obtain_JSON(model_output)
 
     def determine_action(self, user_request):
-        actions = [
-        "get news",
-        "view profile",
-        "logout",
-        "obtain safety checklist",
-        "preview requests",
-        "weather alerts",
-        "get/send help"
-        ]
-
+        actions = self.possible_actions
         prompt = f'''Based on the user's input, identify the action they want to take from the following list (choose answers exactly from the list):
-
         Actions:
         - {', '.join(actions)}
 
@@ -96,51 +89,20 @@ class UserActionHandler:
         '''
         actions = self.model.generate_text(prompt).strip()
         print(actions)
+        return actions
+
+    def parseActions(self, previous_request, action_list):
+        actions =[]
+
+        for action in self.possible_actions:
+            if action in action_list:
+                actions.append(action)
 
         return actions
 
-    def handleActions(self, previous_request,actions):
-        response_found = False
-        responses =[]
-
-        if "get news" in actions:
-            print("Action identified: get news")
-            response_found = True
-            news_list = self.obtain_news_list()
-
-
-        if "view profile" in actions:
-            print("Action identified: view profile")
-            response_found = True
-            # Add logic for viewing profile
-        if "logout" in actions:
-            print("Action identified: logout")
-            response_found = True
-            # Add logic for logout
-        if "obtain safety checklist" in actions:
-            print("Action identified: obtain safety checklist")
-            response_found = True
-            # Add logic for obtaining safety checklist
-        if "preview requests" in actions:
-            print("Action identified: preview requests")
-            response_found = True
-            # Add logic for previewing requests
-        if "weather alerts" in actions:
-            print("Action identified: weather alerts")
-            # Add logic for handling weather alerts
-        if "help" in actions:
-            print("Action identified: get/send help")
-            responses.append(self.extract_tools(previous_request))
-        if response_found == False:
-            print("Unidentified action.")
-
-        for response in responses:
-            print(response)
-
-    def generateResponses(self, user_request)->list[int,str]:
-        actions = self.determine_action(user_request)
-        results=self.handleActions(user_request, actions)
-
+    def generateTasks(self, user_request)->list[int,str]:
+        action_list = self.determine_action(user_request)
+        results=self.parseActions(user_request, action_list)
         return results
 
     def get_location(self, user_request):
@@ -162,5 +124,6 @@ if __name__ == '__main__':
 
     # user_input = "I want to donate a ladder."
     handler = UserActionHandler()
-    user_input = "I want a generator, ladders, a few waters, and seven plastic trays. I would like to donate some Plywood."
-    response = handler.determine_action(user_input)
+    user_input = "I want a generator, ladders, a few waters, and seven plastic trays. I would like to donate some Plywood. "
+    response = handler.generateTasks(user_input)
+    print(response)
