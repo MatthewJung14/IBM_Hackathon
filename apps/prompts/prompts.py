@@ -20,8 +20,8 @@ model = ModelInference(
   }
 )
 
-#user_input = "I want a generator, ladders, a few waters, and seven plastic trays. I would like to donate some Plywood."
-user_input = "I want ice cream."
+user_input = "I want a generator, ladders, a few waters, and seven plastic trays. I would like to donate some Plywood."
+#user_input = "I want ice cream."
 
 def determine_action():
     actions = [
@@ -73,12 +73,17 @@ def determine_action():
         print("Action identified: weather alerts")
         response_found = True
         # Add logic for handling weather alerts
-    if "get/send help" in action:
+    if "help" in action:
         response_found = True
         responses.append(extract_tools)
         print("Action identified: get/send help")
     if response_found == False:
         print("Unidentified action.")
+
+    for response in responses:
+        print(response)
+
+    return responses
 
 def extract_tools():
     items_list = obtain_tool_list()
@@ -106,6 +111,9 @@ def extract_tools():
     '''
     model_output = model.generate_text(prompt)
     #print(model_output)
+
+    location = get_location()
+    print(location)
 
     return obtain_JSON(model_output)
 
@@ -145,15 +153,13 @@ def get_location():
     
     if location_match:
         return location_match.group(1).strip()  # Return the extracted location
-    elif "false" in response.lower():
-        return "No location."
     else:
-        return "Unexpected response."
+        return "No location."
 
 
-#determine_action()
+determine_action()
 
-print(get_location())
+#print(get_location())
 
 # def parseRequest(request):
 #     #1, see what the request is
