@@ -4,12 +4,9 @@ from ibm_watsonx_ai.foundation_models import ModelInference
 import json
 import re
 
-api_key = "C9S_dk9_zIAAxT8YKPNI6ka2f8tXSDCO2Yef4viieCk0"
-user_input = "I want a generator, ladders, a few waters, and seven plastic trays. I would like to donate some Plywood."
-#user_input = "I want to donate a ladder."
 
 class UserActionHandler:
-    def __init__(self, api_key, project_id, model_id="ibm/granite-13b-chat-v2", url="https://us-south.ml.cloud.ibm.com"):
+    def __init__(self,project_id="ada8a81e-64d2-4d9b-a0c3-421e15989a77", api_key = "C9S_dk9_zIAAxT8YKPNI6ka2f8tXSDCO2Yef4viieCk0", model_id="ibm/granite-3-8b-instruct", url="https://us-south.ml.cloud.ibm.com"):
         # Set up credentials and model inference instance
         credentials = Credentials(url=url, api_key=api_key)
         client = APIClient(credentials)
@@ -153,6 +150,9 @@ class UserActionHandler:
         else:
             return "No location."
 
-handler = UserActionHandler(api_key=api_key, project_id="ada8a81e-64d2-4d9b-a0c3-421e15989a77")
-response = handler.determine_action(user_input)
-#print("Response:", response)
+if __name__ == '__main__':
+
+    # user_input = "I want to donate a ladder."
+    handler = UserActionHandler()
+    user_input = "I want a generator, ladders, a few waters, and seven plastic trays. I would like to donate some Plywood."
+    response = handler.determine_action(user_input)
