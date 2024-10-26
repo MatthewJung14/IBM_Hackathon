@@ -78,7 +78,8 @@ def logout():
     if user_id:
         user_clients.pop(user_id, None)
     session.pop("user", None)
-    return redirect(kinde_client.logout(redirect_to=url_for('authentication_blueprint.login')))
+    LOGOUT_REDIRECT_URL = "http://localhost:5000"
+    return redirect(kinde_client.logout(redirect_to=LOGOUT_REDIRECT_URL))
 
 
 
