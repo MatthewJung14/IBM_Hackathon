@@ -3,6 +3,80 @@
 from flask import render_template, redirect, request, url_for, session, current_app, jsonify
 from apps.chatbotAPI import blueprint
 
+# Hypothetical function that processes the input string
+def process_message(input_string: str) -> list:
+    """
+    Processes the input string and returns a list of tuples containing strings and integers.
+
+    :param input_string: The input message to process.
+    :return: A list of tuples, each containing a string and an integer.
+    """
+    # Placeholder implementation
+    # Replace this with the actual logic as needed
+    return [("response1", 1), ("response2", 2), ("response3", 3)]
+
+
+@blueprint.route('/message', methods=['POST'])
+def handle_message():
+    """
+    Endpoint to handle messages. Accepts a JSON payload with a 'message' field.
+    Processes the message and returns a JSON response containing the results.
+
+    Expected JSON Payload:
+    {
+        "message": "Your input string here"
+    }
+
+    Responses:
+    - Success: 200 OK with the processed data.
+    - Client Error: 400 Bad Request if the input string is empty or missing.
+    - Server Error: 500 Internal Server Error for unexpected issues.
+    """
+    data = request.get_json()
+
+    # Check if JSON payload is provided
+    if not data:
+        return jsonify({"error": "Missing JSON payload"}), 400
+
+    # Retrieve the 'message' field from the JSON payload
+    message = data.get('message')
+
+    # Validate that the 'message' field exists and is not empty
+    if message is None:
+        return jsonify({"error": "Missing 'message' field in the request"}), 400
+    if not isinstance(message, str):
+        return jsonify({"error": "'message' must be a string"}), 400
+    if message.strip() == "":
+        return jsonify({"error": "'message' field cannot be empty"}), 400
+
+    try:
+        # Process the message using the hypothetical function
+        processed_data = process_message(message)
+
+        # Validate the processed data format
+        if not isinstance(processed_data, list):
+            return jsonify({"error": "Processed data is not a list"}), 500
+        for item in processed_data:
+            if not (isinstance(item, tuple) and len(item) == 2):
+                return jsonify({"error": "Each item in processed data must be a tuple of (string, int)"}), 500
+            if not isinstance(item[0], str) or not isinstance(item[1], int):
+                return jsonify({"error": "Each tuple must contain a string and an integer"}), 500
+
+        # Structure the response data
+        response = {
+            "status": "Message processed successfully",
+            "results": [
+                {"text": text, "number": number} for text, number in processed_data
+            ]
+        }
+
+        return jsonify(response), 200
+
+    except Exception as e:
+        # Log the exception details (optional but recommended)
+        current_app.logger.error(f"Error processing message: {str(e)}")
+        return jsonify({"error": "An error occurred while processing the message"}), 500
+
 
 @blueprint.route('/')
 def route_default():
@@ -12,23 +86,42 @@ def route_default():
     available_actions = {
         "available_actions": [
             {
-                "endpoint": "/donate",
+                "endpoint": "/message",
                 "method": "POST",
-                "description": "Donate a list of items. (Updates the database)",
+                "description": "Send a message and receive processed responses.",
                 "payload": {
-                    "user_id": "string (256 characters)",
-                    "x": "float (Longitude of the donation location)",
-                    "y": "float (Latitude of the donation location)",
-                    "item_location": "string (General location description)",
-                    "items": "list of [item_type (string), item_amount (integer)]"
+                    "message": "string (The input message to process)"
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successfully processed the message.",
+                        "example": {
+                            "status": "Message processed successfully",
+                            "results": [
+                                {"text": "response1", "number": 1},
+                                {"text": "response2", "number": 2},
+                                {"text": "response3", "number": 3}
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Possible reasons: Missing payload, missing 'message' field, or empty 'message'.",
+                        "example": {
+                            "error": "'message' field cannot be empty"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error. An unexpected error occurred.",
+                        "example": {
+                            "error": "An error occurred while processing the message"
+                        }
+                    }
                 }
             }
         ]
     }
 
     return jsonify(available_actions), 200
-
-
 
 
 @blueprint.errorhandler(403)
