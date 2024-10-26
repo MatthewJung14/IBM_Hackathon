@@ -2,7 +2,7 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
-
+from apps import kinde_client
 from apps.home import blueprint
 from flask import render_template, request
 from flask_login import login_required
@@ -25,9 +25,14 @@ def route_template(template):
 
         # Detect the current page
         segment = get_segment(request)
-
+        user= kinde_client.get_user_details()
+        profile_picture= user.get('picture')
+        print(profile_picture)
+        given_name= user.get('given_name')
+        family_name= user.get('family_name')
+        user_email = user.get('email')
         # Serve the file (if exists) from app/templates/home/FILE.html
-        return render_template("home/" + template, segment=segment)
+        return render_template("home/" + template, segment=segment, profile_picture=profile_picture, given_name=given_name, family_name=family_name, user_email=user_email)
 
     except TemplateNotFound:
         return render_template('home/page-404.html'), 404
