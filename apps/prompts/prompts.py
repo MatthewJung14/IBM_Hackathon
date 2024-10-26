@@ -35,6 +35,26 @@ def obtain_news_list(news_file_path="news.json"):
     news_list = list(news_data.keys())
     return news_list
 
+def get_news():
+    with open('news.json', 'r') as file:
+        news_list = json.load(file)
+    # Print or use the data
+    # print(news_list)
+    # news_list = obtain_news_list()
+    # item_list = obtain_tool_list()
+    # print(news_list)
+    prompt = "Whats 2 + 2"
+
+    #     f'''Summarize these articles and alerts from the JSON to give an overall view of the weather and emergency situation in a friendly human readable format:
+    # {news_list}
+    #
+    #
+    #   '''
+    # print(model.generate(prompt))
+    print(model.generate_text(prompt))
+
+
+
 def obtain_JSON(model_output):
     json_pattern = re.search(r'\{.*\}', model_output, re.DOTALL)
     if json_pattern:
@@ -105,25 +125,7 @@ def determine_action():
     if "get news" in action:
         print("Action identified: get news")
         response_found = True
-
-        with open('news.json', 'r') as file:
-            news_list = json.load(file)
-        # Print or use the data
-        # print(news_list)
-        # news_list = obtain_news_list()
-        # item_list = obtain_tool_list()
-        #print(news_list)
-        prompt = "Whats 2 + 2"
-
-        #     f'''Summarize these articles and alerts from the JSON to give an overall view of the weather and emergency situation in a friendly human readable format:
-        # {news_list}
-        #
-        #
-        #   '''
-        # print(model.generate(prompt))
-        print(model.generate_text(prompt))
         # Add logic for getting news
-
     if "view profile" in action:
         print("Action identified: view profile")
         response_found = True
