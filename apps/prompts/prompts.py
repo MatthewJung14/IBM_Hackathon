@@ -93,29 +93,37 @@ def determine_action():
     '''
     action = model.generate_text(prompt).strip()
     print(action)
+    response_found = False
 
     if "get news" in action:
         print("Action identified: get news")
+        response_found = True
         # Add logic for getting news
     if "view profile" in action:
         print("Action identified: view profile")
+        response_found = True
         # Add logic for viewing profile
     if "logout" in action:
         print("Action identified: logout")
+        response_found = True
         # Add logic for logout
     if "obtain safety checklist" in action:
         print("Action identified: obtain safety checklist")
+        response_found = True
         # Add logic for obtaining safety checklist
     if "preview requests" in action:
         print("Action identified: preview requests")
+        response_found = True
         # Add logic for previewing requests
     if "weather alerts" in action:
         print("Action identified: weather alerts")
+        response_found = True
         # Add logic for handling weather alerts
     if "get/send help" in action:
+        response_found = True
         extract_tools()
         print("Action identified: get/send help")
-    else:
+    if response_found == False:
         print("Unidentified action.")
 
 determine_action()
