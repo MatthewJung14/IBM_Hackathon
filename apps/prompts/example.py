@@ -33,7 +33,7 @@ def obtain_JSON(model_output):
         try:
             # Parse JSON string and write to file
             json_data = json.loads(json_str)
-            print("JSON data saved to model_output.json")
+            print(json_data)
             return json_data
         except json.JSONDecodeError:
             print("Extracted text is not valid JSON:", json_str)
@@ -43,7 +43,7 @@ def obtain_JSON(model_output):
 def extract_tools():
     items_list = obtain_tool_list()
 
-    user_input = "I want a generator, ladders, a few waters, and seven plastic trays."
+    user_input = "I want a generator, ladders, a few waters, and seven plastic trays. I would like to donate some Plywood."
 
     prompt = f'''Analyze the user's intent based on the input text and respond with only one of the following JSON outputs, based on that intent.
     Limit items to those in this list: {items_list}.
@@ -52,26 +52,23 @@ def extract_tools():
 
     Format all JSON items to be donated like this:
     {{
-        "donate": [["item 1", "amount"], ["item 2", "amount"], ...]
+        "donate": [["item 1", amount], ["item 2", amount], ...]
     }}
 
     Format all JSON items to be needed like this:
     {{
-        "needs": [["item 1", "amount"], ["item 2", "amount"], ...]
+        "needs": [["item 1", amount], ["item 2", amount], ...]
     }}
+
+    Ensure that the output only contains "needs" and "donate". 
+    
+    If the user does not specify an amount, determine the number yourself, and return it as an integer.
 
     Text: "{user_input}"
     '''
     model_output = model.generate_text(prompt)
-    print(model_output)
+    #print(model_output)
 
     return obtain_JSON(model_output)
 
 extract_tools()
-
-# user_input = "My Kitchen got flooded."
-
-# prompt = '''Respond in JSON format with lists of items that a person "needs" and items they "give" based on the input text. Use this format: 
-# {{"needs": ["item 1", "amount", "item 2", "amount" ...], "gives": ["item 1", "amount", "item 2", "amount" ...]}}
-# Text: "{user_input}"
-# '''
