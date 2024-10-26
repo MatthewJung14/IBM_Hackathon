@@ -3,9 +3,10 @@ from ibm_watsonx_ai import Credentials
 from ibm_watsonx_ai.foundation_models import ModelInference
 import json
 import re
+import textwrap
 
 api_key = "C9S_dk9_zIAAxT8YKPNI6ka2f8tXSDCO2Yef4viieCk0"
-user_input = "I want a generator, ladders, a few waters, and seven plastic trays. I would like to donate some Plywood."
+user_input = "What is the situation like currently"
 #user_input = "I want to donate a ladder."
 
 class UserActionHandler:
@@ -26,13 +27,13 @@ class UserActionHandler:
         items_list = list(tools_data.keys())
         return items_list
 
-    def get_news():
+    def get_news(self):
         with open('news.json', 'r') as file:
             news_list = json.load(file)
     
         prompt = (f"Create a 20 word short summary about the news from all the titles and descriptions in the articles in the JSON files (Do not describe the json file or quote anything from it): {news_list},")
     
-        result_paragraph = model.generate_text(prompt)
+        result_paragraph = self.model.generate_text(prompt)
         # Wrap the text to a width of 50 characters per line
         wrapped_text = textwrap.fill(result_paragraph, width=50)
     
