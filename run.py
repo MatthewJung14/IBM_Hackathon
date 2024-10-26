@@ -26,6 +26,8 @@ except KeyError:
     exit('Error: Invalid <config_mode>. Expected values [Debug, Production] ')
 
 app = create_app(app_config)
+app.secret_key = '3d1a555f6840b028c43f4edf4bd84b072f44567982c2622a2ac85598c76574e4'
+
 Migrate(app, db)
 
 if not DEBUG:
@@ -38,4 +40,4 @@ if DEBUG:
     app.logger.info('ASSETS_ROOT      = ' + app_config.ASSETS_ROOT )
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True, threaded=True)

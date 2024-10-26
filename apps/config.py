@@ -4,8 +4,13 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 import os, random, string
+from kinde_sdk import Configuration
+from kinde_sdk.kinde_api_client import GrantType, KindeApiClient
+
+
 
 class Config(object):
+
 
     basedir = os.path.abspath(os.path.dirname(__file__))
 

@@ -2,20 +2,49 @@
 """
 Copyright (c) 2019 - present AppSeed.us
 """
+from functools import wraps
 
-from flask import render_template, redirect, request, url_for
+from flask import render_template, redirect, request, url_for, session, current_app
 from flask_login import (
     current_user,
     login_user,
     logout_user
 )
 
-from apps import db, login_manager
+from apps import db, login_manager, kinde_client, user_clients
 from apps.authentication import blueprint
 from apps.authentication.forms import LoginForm, CreateAccountForm
 from apps.authentication.models import Users
 
 from apps.authentication.util import verify_pass
+
+
+def get_authorized_data(kinde_client):
+    user = kinde_client.get_user_details()
+    return {
+        "id": user.get("id"),
+        "user_given_name": user.get("given_name"),
+        "user_family_name": user.get("family_name"),
+        "user_email": user.get("email"),
+        "user_picture": user.get("picture"),
+    }
+
+def is_user_authenticated():
+    if session.get("user"):
+        kinde_client = user_clients.user_clients.get(session.get("user"))
+        if kinde_client and kinde_client.is_authenticated():
+            return True
+    return False
+
+
+def kinde_login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not is_user_authenticated():
+            return redirect(url_for('authentication_blueprint.login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 
 @blueprint.route('/')
@@ -25,80 +54,32 @@ def route_default():
 
 # Login & Registration
 
-@blueprint.route('/login', methods=['GET', 'POST'])
+@blueprint.route('/login')
 def login():
-    login_form = LoginForm(request.form)
-    if 'login' in request.form:
+    return redirect(kinde_client.get_login_url())
 
-        # read form data
-        username = request.form['username']
-        password = request.form['password']
-
-        # Locate user
-        user = Users.query.filter_by(username=username).first()
-
-        # Check the password
-        if user and verify_pass(password, user.password):
-
-            login_user(user)
-            return redirect(url_for('authentication_blueprint.route_default'))
-
-        # Something (user or pass) is not ok
-        return render_template('accounts/login.html',
-                               msg='Wrong user or password',
-                               form=login_form)
-
-    if not current_user.is_authenticated:
-        return render_template('accounts/login.html',
-                               form=login_form)
-    return redirect(url_for('home_blueprint.index'))
-
-
-@blueprint.route('/register', methods=['GET', 'POST'])
+@blueprint.route('/register')
 def register():
-    create_account_form = CreateAccountForm(request.form)
-    if 'register' in request.form:
+    return redirect(kinde_client.get_register_url())
 
-        username = request.form['username']
-        email = request.form['email']
-
-        # Check usename exists
-        user = Users.query.filter_by(username=username).first()
-        if user:
-            return render_template('accounts/register.html',
-                                   msg='Username already registered',
-                                   success=False,
-                                   form=create_account_form)
-
-        # Check email exists
-        user = Users.query.filter_by(email=email).first()
-        if user:
-            return render_template('accounts/register.html',
-                                   msg='Email already registered',
-                                   success=False,
-                                   form=create_account_form)
-
-        # else we can create the user
-        user = Users(**request.form)
-        db.session.add(user)
-        db.session.commit()
-
-        # Delete user from session
-        logout_user()
-        
-        return render_template('accounts/register.html',
-                               msg='Account created successfully.',
-                               success=True,
-                               form=create_account_form)
-
-    else:
-        return render_template('accounts/register.html', form=create_account_form)
-
+@blueprint.route('/callback')
+def callback():
+    print(request.url)
+    kinde_client.fetch_token(authorization_response=request.url)
+    data = {}
+    data.update(get_authorized_data(kinde_client))
+    session["user"] = data.get("id")
+    user_clients[data.get("id")] = kinde_client
+    return redirect(url_for("home_blueprint.index"))
 
 @blueprint.route('/logout')
 def logout():
-    logout_user()
-    return redirect(url_for('authentication_blueprint.login'))
+    user_id = session.get("user")
+    if user_id:
+        user_clients.pop(user_id, None)
+    session.pop("user", None)
+    return redirect(kinde_client.logout(redirect_to=url_for('authentication_blueprint.login')))
+
 
 
 # Errors
