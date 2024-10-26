@@ -12,7 +12,7 @@ credentials = Credentials(
 client = APIClient(credentials)
 
 model = ModelInference(
-  model_id="ibm/granite-13b-chat-v2",
+  model_id="ibm/granite-3-8b-instruct",
   api_client=client,
   project_id="ada8a81e-64d2-4d9b-a0c3-421e15989a77",
   params = {
@@ -38,19 +38,8 @@ def obtain_news_list(news_file_path="news.json"):
 def get_news():
     with open('news.json', 'r') as file:
         news_list = json.load(file)
-    # Print or use the data
-    # print(news_list)
-    # news_list = obtain_news_list()
-    # item_list = obtain_tool_list()
-    # print(news_list)
-    prompt = "Whats 2 + 2"
 
-    #     f'''Summarize these articles and alerts from the JSON to give an overall view of the weather and emergency situation in a friendly human readable format:
-    # {news_list}
-    #
-    #
-    #   '''
-    # print(model.generate(prompt))
+    prompt = f"Create a short summary about the news from all the titles and descriptions in the articles in the JSON files (Do not describe the json file): {news_list}"
     print(model.generate_text(prompt))
 
 
@@ -126,6 +115,7 @@ def determine_action():
         print("Action identified: get news")
         response_found = True
         # Add logic for getting news
+        get_news()
     if "view profile" in action:
         print("Action identified: view profile")
         response_found = True
