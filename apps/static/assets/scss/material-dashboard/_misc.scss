@@ -306,7 +306,7 @@ hr.horizontal {
 // VR Pages
 
 @include media-breakpoint-up(lg) {
-  .virtual-reality {
+  .need-help {
     .sidenav {
       margin-top: $spacer * 2;
       animation-name: $animation-name;
