@@ -14345,7 +14345,7 @@ hr.horizontal {
   transform: translate(0, -50%); }
 
 @media (min-width: 992px) {
-  .virtual-reality .sidenav {
+  .need-help .sidenav {
     margin-top: 2rem;
     animation-name: fadeInBottom;
     animation-fill-mode: both;
