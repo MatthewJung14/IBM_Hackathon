@@ -6,6 +6,38 @@ from sqlalchemy.orm import Session
 from apps import db
 from apps.databaseAPI.models import WantedItem, DonatedItem, ItemLink
 
+
+def haversine_distance_sql(lon1, lat1, lon2, lat2):
+    """
+    Returns the Haversine distance between two points in miles using SQLAlchemy functions.
+
+    :param lon1: Longitude of the first point.
+    :param lat1: Latitude of the first point.
+    :param lon2: Longitude of the second point.
+    :param lat2: Latitude of the second point.
+    :return: SQLAlchemy expression representing the Haversine distance in miles.
+    """
+    # Earth's radius in miles
+    R = 3959
+
+    # Convert decimal degrees to radians
+    lon1_rad = func.radians(lon1)
+    lat1_rad = func.radians(lat1)
+    lon2_rad = func.radians(lon2)
+    lat2_rad = func.radians(lat2)
+
+    # Haversine formula
+    dlon = lon2_rad - lon1_rad
+    dlat = lat2_rad - lat1_rad
+
+    a = func.pow(func.sin(dlat / 2), 2) + func.cos(lat1_rad) * func.cos(lat2_rad) * func.pow(func.sin(dlon / 2), 2)
+    c = 2 * func.asin(func.sqrt(a))
+
+    distance = R * c
+    return distance
+
+
+
 def list_available_items(
     item_types: List[str],
     x: Optional[float] = None,
@@ -138,48 +170,54 @@ def list_available_items(
 
 
 def find_closest_items(
-    item_type: str,
-    amount: int,
-    x: float,
-    y: float,
-    max_distance: float
-) -> List[Tuple[int, float, float, int]]:
+        item_type: str,
+        amount: int,
+        x: float,  # Longitude of desired location
+        y: float,  # Latitude of desired location
+        max_distance: float
+) -> List[Tuple[int, float, float, str, int]]:
     """
-    Finds the closest available donated items to fulfill a wanted item request.
+    Finds the closest available donated items to fulfill a wanted item request using the Haversine distance.
 
     :param item_type: The type of the item to find.
     :param amount: The total amount needed.
-    :param x: X-coordinate of the desired location.
-    :param y: Y-coordinate of the desired location.
-    :param max_distance: Maximum distance to search for items.
+    :param x: Longitude of the desired location.
+    :param y: Latitude of the desired location.
+    :param max_distance: Maximum distance to search for items (in miles).
     :return: List of tuples, each containing:
-             (donated_item_id, donated_x, donated_y, allocated_amount)
+             (donated_item_id, donated_x, donated_y, item_location, allocated_amount)
     """
+    session: Session = db.session
+
     # Subquery to calculate total fulfilled for DonatedItems
     fulfilled_donated_subq = (
-        db.session.query(
+        session.query(
             ItemLink.donated_item_id,
             func.coalesce(func.sum(ItemLink.amount_fulfilled), 0).label('total_fulfilled')
         )
-        .filter(ItemLink.donated_item_id == DonatedItem.id)
         .group_by(ItemLink.donated_item_id)
         .subquery()
     )
 
-    # Query to get available donated items with calculated available_amount
+    # Calculate Haversine distance and filter donated items within max_distance
+    distance_expr = haversine_distance_sql(DonatedItem.x, DonatedItem.y, x, y)
+
+    # Query to get available donated items with calculated available_amount and distance
     available_donated = (
-        db.session.query(
+        session.query(
             DonatedItem.id,
             DonatedItem.x,
             DonatedItem.y,
-            (DonatedItem.item_amount - func.coalesce(fulfilled_donated_subq.c.total_fulfilled, 0)).label('available_amount'),
-            func.sqrt(func.pow(DonatedItem.x - x, 2) + func.pow(DonatedItem.y - y, 2)).label('distance')
+            DonatedItem.item_location,  # Include the location name
+            (DonatedItem.item_amount - func.coalesce(fulfilled_donated_subq.c.total_fulfilled, 0)).label(
+                'available_amount'),
+            distance_expr.label('distance')
         )
         .outerjoin(fulfilled_donated_subq, DonatedItem.id == fulfilled_donated_subq.c.donated_item_id)
         .filter(
             DonatedItem.item_type == item_type,
             DonatedItem.is_available == True,
-            func.sqrt(func.pow(DonatedItem.x - x, 2) + func.pow(DonatedItem.y - y, 2)) <= max_distance,
+            distance_expr <= max_distance,
             (DonatedItem.item_amount - func.coalesce(fulfilled_donated_subq.c.total_fulfilled, 0)) > 0
         )
         .order_by('distance')
@@ -200,10 +238,12 @@ def find_closest_items(
         needed = amount - total_collected
         allocated = min(available, needed)
 
-        result.append((item.id, item.x, item.y, allocated))
+        # Append item_location to the tuple
+        result.append((item.id, item.x, item.y, item.item_location, allocated))
         total_collected += allocated
 
     return result
+
 
 
 def donateListofItems(

@@ -26,8 +26,8 @@ def route_default():
                 "description": "Donate a list of items. (Updates the database)",
                 "payload": {
                     "user_id": "string (256 characters)",
-                    "x": "float (X-coordinate of the donation location)",
-                    "y": "float (Y-coordinate of the donation location)",
+                    "x": "float (Longitude of the donation location)",
+                    "y": "float (Latitude of the donation location)",
                     "item_location": "string (General location description)",
                     "items": "list of [item_type (string), item_amount (integer)]"
                 }
@@ -73,9 +73,9 @@ def route_default():
                 "description": "List available wanted and donated items based on item types and optional location filtering.",
                 "parameters": {
                     "item_types": "list of strings (item types to filter)",
-                    "x": "float (optional, X-coordinate for filtering donated items)",
-                    "y": "float (optional, Y-coordinate for filtering donated items)",
-                    "distance": "float (optional, radius distance for filtering donated items)"
+                    "x": "float (optional, Longitude for filtering donated items)",
+                    "y": "float (optional, Latitude for filtering donated items)",
+                    "distance": "float (optional, radius distance in miles for filtering donated items)"
                 }
             },
             {
@@ -85,9 +85,9 @@ def route_default():
                 "parameters": {
                     "item_type": "string (type of item to find)",
                     "amount": "integer (total amount needed)",
-                    "x": "float (X-coordinate of the desired location)",
-                    "y": "float (Y-coordinate of the desired location)",
-                    "max_distance": "float (maximum distance to search for items)"
+                    "x": "float (Longitude of the desired location)",
+                    "y": "float (Latitude of the desired location)",
+                    "max_distance": "float (maximum distance in miles to search for items)"
                 }
             }
         ]
@@ -105,12 +105,12 @@ def donate_items():
     data = request.get_json()
 
     user_id = data.get('user_id')
-    x = data.get('x')
-    y = data.get('y')
+    x = data.get('x')  # Longitude
+    y = data.get('y')  # Latitude
     item_location = data.get('item_location')
     items = data.get('items')  # Expected to be a list of [item_type, item_amount] lists
 
-    if not all([user_id, x!=None, y!=None, item_location, items]):
+    if not all([user_id, x !=None, y !=None, item_location, items]):
         return jsonify({"error": "Missing required parameters"}), 400
 
     # Validate items format
@@ -281,8 +281,8 @@ def list_available_items_route():
     Expects query parameters: item_types (can be multiple), x, y, distance.
     """
     item_types = request.args.getlist('item_types')  # e.g., /list-available-items?item_types=Blankets&item_types=Food
-    x = request.args.get('x', type=float)
-    y = request.args.get('y', type=float)
+    x = request.args.get('x', type=float)  # Longitude
+    y = request.args.get('y', type=float)  # Latitude
     distance = request.args.get('distance', type=float)
 
     if not item_types:
@@ -327,8 +327,8 @@ def find_closest_items_route():
     """
     item_type = request.args.get('item_type')
     amount = request.args.get('amount', type=int)
-    x = request.args.get('x', type=float)
-    y = request.args.get('y', type=float)
+    x = request.args.get('x', type=float)  # Longitude
+    y = request.args.get('y', type=float)  # Latitude
     max_distance = request.args.get('max_distance', type=float)
 
     # Validate required parameters
@@ -347,15 +347,17 @@ def find_closest_items_route():
         allocations = [
             {
                 "donated_item_id": item_id,
-                "location": {"x": donated_x, "y": donated_y},
+                "location name":address,
+                "coordinates": {"x": donated_x, "y": donated_y},
                 "allocated_amount": allocated
             }
-            for item_id, donated_x, donated_y, allocated in closest_items
+            for item_id, donated_x, donated_y, address, allocated in closest_items
         ]
 
         return jsonify({"closest_items": allocations}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
 
 
 @blueprint.errorhandler(403)
