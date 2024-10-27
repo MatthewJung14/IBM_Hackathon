@@ -1,136 +1,80 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Florida Map with Geolocation and Markers {% endblock %}
+{% block title %}Dashboard with Map and Chatbot{% endblock %}
 
-<!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
+<!-- Leaflet map and chatbot stylesheets -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
-    integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
-    crossorigin=""/>
-<style>
-    body {
-        background-color: #f8f9fa;
-        font-family: 'Roboto', sans-serif;
-    }
-
-    #map { 
-        height: 500px; 
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        background-color: white;
-        margin-top: 20px;
-    }
-</style>
+    integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin=""/>
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/florida_map.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/chatbot.css') }}">
 {% endblock stylesheets %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <h2 class="text-center">Florida Map with Geolocation and Markers</h2>
-    <div class="row justify-content-center">
-        <div id="map"></div>
+<div class="container py-4">
+    <h2 class="text-center mb-4">Dashboard</h2>
+    <div class="card transparent-container">
+        <div class="card-body">
+            <div class="row">
+                <!-- Chatbot Card -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 transparent-container">
+                        <div class="card-body">
+                            <section class="msger">
+                                <header class="msger-header">
+                                    <div class="msger-header-title">
+                                        <i class="fas fa-comment-alt"></i> Find My Relief
+                                    </div>
+                                </header>
+
+                                <main class="msger-chat">
+                                    <!-- Typewriter message will be inserted here via JavaScript -->
+                                </main>
+
+                                <form class="msger-inputarea">
+                                    <input type="text" class="msger-input" placeholder="Enter your message..." />
+                                    <input type="file" id="file-input" style="display: none;" />
+                                    <button type="button" id="file-upload-btn" class="msger-send-btn">📎</button>
+                                    <button type="submit" class="msger-send-btn">Send</button>
+                                </form>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Card -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Florida Map with Geolocation and Markers</h5>
+                            <div id="map"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Embed user data as data attributes -->
+    <div id="user-data"
+         data-user-id="{{ user_id }}"
+         data-profile-picture="{{ profile_picture }}"
+         data-given-name="{{ given_name }}"
+         data-family-name="{{ family_name }}"
+         data-user-email="{{ user_email }}">
     </div>
 
     {% include 'includes/footer.html' %}
 </div>
 {% endblock content %}
 
-<!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
+<!-- Leaflet map, chatbot, and other scripts -->
 <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
-    integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg="
-    crossorigin=""></script>
-
+    integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 <script src="{{ url_for('static', filename='assets/js/locations.js') }}"></script>
-
-<script>
-    const map = L.map('map').setView([27.9944024, -81.7602544], 7); // Centered on Florida
-
-    // Map tile layer
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    }).addTo(map);
-
-    const redIcon = new L.Icon({
-        iconUrl: '../../static/assets/img/location_11970459.png',
-        iconSize: [30, 33],
-        iconAnchor: [15, 30]
-    });
-
-    // Fetch data from the API
-    fetch('http://localhost:5000/api/data-lists')
-        .then(response => response.json())
-        .then(data => {
-            const donationList = data.donated_items;
-            const neededList = data.wanted_items;
-            const connectList = data.item_links;
-
-            const locationsInstance = new Locations(donationList, neededList, connectList);
-            const donationLocations = locationsInstance.getDonationLocations();
-            const neededLocations = locationsInstance.getNeededLocations();
-            const connectedLocations = locationsInstance.getConnectionLocations();
-
-            // Define custom colors for the icons
-            const neededColour = '#E3242B';  // Red for needed locations
-            const donationColour = '#1E90FF'; // Blue for donation locations
-            const connectionColor = '#800080'; // Purple for connected locations
-
-            // Create icon styles for each type
-            const createIcon = (color) => {
-                return L.divIcon({
-                    className: "my-custom-pin",
-                    iconAnchor: [0, 12],
-                    labelAnchor: [-6, 0],
-                    popupAnchor: [0, -36],
-                    html: `
-                        <span style="
-                            background-color: ${color};
-                            width: 2rem;
-                            height: 2rem;
-                            display: block;
-                            left: -1rem;
-                            top: -1rem;
-                            position: relative;
-                            border-radius: 2rem 2rem 0;
-                            transform: rotate(45deg);
-                            border: 1px solid #FFFFFF">
-                        </span>`
-                });
-            };
-
-            // Add donation markers to the map with blue icon
-            donationLocations.forEach(location => {
-                L.marker([location.x, location.y], { icon: createIcon(donationColour) })
-                    .addTo(map)
-                    .bindPopup(`<b>Item:</b> ${location.item_type}<br><b>Amount:</b> ${location.item_amount}`);
-            });
-
-            // Add needed markers to the map with red icon
-            neededLocations.forEach(location => {
-                L.marker([location.x, location.y], { icon: createIcon(neededColour) })
-                    .addTo(map)
-                    .bindPopup(`<b>Item:</b> ${location.item_type}<br><b>Amount:</b> ${location.item_amount}`);
-            });
-
-            // Draw lines between connected locations
-            connectedLocations.forEach(connection => {
-                const xd = connection.xd; // Latitude of donation location
-                const yd = connection.yd; // Longitude of donation location
-                const xw = connection.xw; // Latitude of needed location
-                const yw = connection.yw; // Longitude of needed location
-
-                L.polyline([[xd, yd], [xw, yw]], {
-                    color: connectionColor,
-                    weight: 4,
-                    opacity: 0.8,
-                    smoothFactor: 1
-                }).addTo(map);
-        });
-        })
-        .catch(error => {
-            console.error('Error fetching data:', error);
-        });
-
-</script>
+<script src="{{ url_for('static', filename='assets/js/florida_map.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/chatbot.js') }}"></script>
 {% endblock javascripts %}
