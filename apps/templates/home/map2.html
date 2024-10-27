@@ -1,42 +1,88 @@
+<!-- templates/home/chatbot.html -->
+
 {% extends "layouts/base.html" %}
 
-{% block title %} Florida Map with Geolocation and Markers {% endblock %}
+{% block title %}Chatbot{% endblock %}
 
-<!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
+<!-- Link to the external CSS file -->
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/chatbot.css') }}">
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
     integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
     crossorigin=""/>
 <style>
-    body {
-        background-color: #f8f9fa;
-        font-family: 'Roboto', sans-serif;
+    .flex-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px; /* Optional space between the two sections */
     }
 
-    #map { 
-        height: 500px; 
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        background-color: white;
-        margin-top: 20px;
+    .msger {
+        flex: 1; /* This makes the chatbot flexible */
+    }
+
+    #map {
+        flex: 1; /* This makes the map flexible */
+        height: 500px; /* Ensure the height remains consistent */
     }
 </style>
 {% endblock stylesheets %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <h2 class="text-center">Florida Map with Geolocation and Markers</h2>
+  <div class="row justify-content-center">
+    <section class="msger">
+      <header class="msger-header">
+        <div class="msger-header-title">
+          <i class="fas fa-comment-alt"></i> Find My Relief
+        </div>
+        <!-- Gear icon removed as per instructions -->
+      </header>
+
+      <main class="msger-chat">
+        <!-- Typewriter message will be inserted here via JavaScript -->
+      </main>
+
+      <form class="msger-inputarea">
+        <input type="text" class="msger-input" placeholder="Enter your message..." />
+        <input type="file" id="file-input" style="display: none;" />
+        <button type="button" id="file-upload-btn" class="msger-send-btn">📎</button>
+        <button type="submit" class="msger-send-btn">Send</button>
+      </form>
+    </section>
+  </div>
+
+  <!-- Embed user data as data attributes -->
+  <div id="user-data"
+       data-user-id="{{ user_id }}"
+       data-profile-picture="{{ profile_picture }}"
+       data-given-name="{{ given_name }}"
+       data-family-name="{{ family_name }}"
+       data-user-email="{{ user_email }}">
+  </div>
+
+  <div class="container-fluid py-4">
+
     <div class="row justify-content-center">
         <div id="map"></div>
     </div>
 
     {% include 'includes/footer.html' %}
+  </div>
+
+  {% include 'includes/footer.html' %}
 </div>
 {% endblock content %}
 
-<!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
+<!-- Include interact.js from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+<!-- Include Font Awesome JS if using Font Awesome Icons -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<!-- Link to the external JS file -->
+<script src="{{ url_for('static', filename='assets/js/chatbot.js') }}"></script>
+
 <script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
     integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg="
     crossorigin=""></script>
