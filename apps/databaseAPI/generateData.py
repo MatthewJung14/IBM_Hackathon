@@ -85,21 +85,6 @@ item_types = [
     "First aid supplies",
     "Canned Food",
     "Water",
-    "First aid supplies",
-    "Canned Food",
-    "Water",
-    "First aid supplies",
-    "Canned Food",
-    "Water",
-    "First aid supplies",
-    "Canned Food",
-    "Water",
-    "Canned Food",
-    "Water",
-    "Canned Food",
-    "Water",
-    "Water",
-    "Water",
     "Flashlights",
     "Blankets",
     "Batteries",
@@ -162,17 +147,18 @@ donated_items = []
 wanted_items = []
 
 try:
+    # Generate DonatedItems and WantedItems
     for lat, lon in base_coords:
-        # Generate 5 DonatedItems
-        for _ in range(8):
+        # Generate DonatedItems
+        for _ in range(7):
             # Randomly pick a user_id
             user_id = random.choice(user_ids)
             # Randomly pick an item type
             item_type = random.choice(item_types)
             # Randomly decide the amount
-            item_amount = random.randint(1, 10)
+            item_amount = random.randint(1, 50)
             # Generate random point around base coordinate
-            x, y = random_point_around(lat, lon, radius_km=5)
+            x, y = random_point_around(lat, lon, radius_km=7)
             # Create DonatedItem
             donated_item = DonatedItem(
                 timestamp=datetime.utcnow(),
@@ -187,41 +173,57 @@ try:
             donated_items.append(donated_item)
             session.add(donated_item)
 
-        # Generate 5 WantedItems
-        for _ in range(30):
+        # Generate WantedItems
+        for _ in range(50):
             # Randomly pick a user_id
             user_id = random.choice(user_ids)
             # Randomly pick an item type
             item_type = random.choice(item_types)
             # Randomly decide the amount
             item_amount = random.randint(1, 10)
-            x, y = random_point_around(lat, lon, radius_km=10)
+            x, y = random_point_around(lat, lon, radius_km=15)
             # Create WantedItem
             wanted_item = WantedItem(
                 timestamp=datetime.utcnow(),
                 user_id=user_id,
                 item_type=item_type,
                 item_amount=item_amount,
-                item_location=str(x)+","+str(y),
+                item_location=f"{x},{y}",
                 is_available=True,
             )
             wanted_items.append(wanted_item)
             session.add(wanted_item)
 
+    # Commit to save DonatedItems and WantedItems and assign IDs
     session.commit()
 
-    # Create ItemLinks between matching items
+    # Now proceed to create ItemLinks between matching items
     item_links = []
 
-    for wanted_item in wanted_items:
-        # Find DonatedItems with matching item_type and is_available
-        matching_donated_items = [d for d in donated_items if d.item_type == wanted_item.item_type and d.is_available]
+    # Initialize amount_remaining for each DonatedItem
+    for donated_item in donated_items:
+        donated_item.amount_remaining = donated_item.item_amount
 
-        if matching_donated_items:
+    for wanted_item in wanted_items:
+        # Initialize amount_remaining for wanted_item
+        wanted_amount_remaining = wanted_item.item_amount
+        # While the wanted item still needs fulfillment
+        while wanted_amount_remaining > 0 and wanted_item.is_available:
+            # Find DonatedItems with matching item_type and is_available
+            matching_donated_items = [
+                d for d in donated_items
+                if d.item_type == wanted_item.item_type and d.is_available and d.amount_remaining > 0
+            ]
+
+            if not matching_donated_items:
+                # No more matching donated items available
+                break
+
             # For simplicity, pick the first matching DonatedItem
             donated_item = matching_donated_items[0]
+
             # Determine the amount to fulfill
-            amount_fulfilled = min(wanted_item.item_amount, donated_item.item_amount)
+            amount_fulfilled = min(wanted_amount_remaining, donated_item.amount_remaining)
             # Create ItemLink
             item_link = ItemLink(
                 wanted_item_id=wanted_item.id,
@@ -230,12 +232,16 @@ try:
             )
             item_links.append(item_link)
             session.add(item_link)
-            # Update the item amounts
-            wanted_item.item_amount -= amount_fulfilled
-            donated_item.item_amount -= amount_fulfilled
-            if wanted_item.item_amount == 0:
+            session.flush()  # Flush to update relationships
+
+            # Update amount_remaining
+            wanted_amount_remaining -= amount_fulfilled
+            donated_item.amount_remaining -= amount_fulfilled
+
+            # Update is_available flags based on amount_remaining
+            if wanted_amount_remaining == 0:
                 wanted_item.is_available = False
-            if donated_item.item_amount == 0:
+            if donated_item.amount_remaining == 0:
                 donated_item.is_available = False
 
     session.commit()
