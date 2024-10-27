@@ -1,5 +1,14 @@
 // static/assets/js/chatbot.js
 
+// Define the mapping from placeholders to URLs
+const linkMappings = {
+  safety: { url: "/safety-checklist", text: "Safety Checklist" },
+  weatherLink: { url: "https://www.weather.com", text: "Weather Updates" },
+  profileLink: { url: "/profile", text: "Your Profile" },
+  logoutLink: { url: "/logout", text: "Logout" },
+  // Add more mappings as needed
+};
+
 // Initialize interact.js for draggable functionality
 interact('.msger')
   .draggable({
@@ -72,6 +81,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function appendMessage(name, img, side, text) {
     const msgClass = side === "left" ? "left-msg" : "right-msg";
+
+    // Replace placeholders with actual links
+    const processedText = replacePlaceholdersWithLinks(text);
+
     const msgHTML = `
       <div class="msg ${msgClass}">
         <div class="msg-img" style="background-image: url(${img});"></div>
@@ -80,12 +93,32 @@ document.addEventListener("DOMContentLoaded", () => {
             <div class="msg-info-name">${name}</div>
             <div class="msg-info-time">${formatDate(new Date())}</div>
           </div>
-          <div class="msg-text">${text}</div>
+          <div class="msg-text">${processedText}</div>
         </div>
       </div>
     `;
     msgerChat.insertAdjacentHTML("beforeend", msgHTML);
     msgerChat.scrollTop = msgerChat.scrollHeight;
+  }
+
+  function replacePlaceholdersWithLinks(text) {
+    // Regular expression to find placeholders like <placeholderName>
+    const placeholderRegex = /<(\w+)>/g;
+
+    return text.replace(placeholderRegex, (match, p1) => {
+      const mapping = linkMappings[p1];
+      if (mapping) {
+        const { url, text } = mapping;
+        // Determine if the URL is external
+        const isExternal = /^(http|https):\/\//.test(url);
+        return isExternal
+          ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`
+          : `<a href="${url}">${text}</a>`;
+      } else {
+        // If no mapping found, return the original placeholder
+        return match;
+      }
+    });
   }
 
   function sendMessageToAPI(message) {
@@ -111,10 +144,12 @@ document.addEventListener("DOMContentLoaded", () => {
       // Remove the loading indicator
       removeLastMessage();
 
-      // Handle different response structures
+      // Check if "results" array exists and is an array
       if (data.results && Array.isArray(data.results)) {
         data.results.forEach(result => {
-          appendMessage(BOT_NAME, BOT_IMG, "left", result.text);
+          if (result.text) {
+            appendMessage(BOT_NAME, BOT_IMG, "left", result.text);
+          }
         });
       } else if (data.message) {
         appendMessage(BOT_NAME, BOT_IMG, "left", data.message);
