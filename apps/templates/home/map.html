@@ -75,12 +75,12 @@
     // ];
 
     // Fetch data from the API
-    fetch('http://localhost:5000/api/data-list')
+    fetch('http://localhost:5000/api/data-lists')
         .then(response => response.json())
         .then(data => {
             const donationList = data.donated_items;
-            const neededList = data.item_links;
-            const connectList = data.connected_items;
+            const neededList = data.wanted_items;
+            const connectList = data.item_links;
 
             const locationsInstance = new Locations(donationList, neededList, connectList);
             const donationLocations = locationsInstance.getDonationLocations();
@@ -131,13 +131,18 @@
 
             // Draw lines between connected locations
             connectedLocations.forEach(connection => {
-                L.polyline([connection.donationCoords, connection.neededCoords], {
+                const xd = connection.xd; // Latitude of donation location
+                const yd = connection.yd; // Longitude of donation location
+                const xw = connection.xw; // Latitude of needed location
+                const yw = connection.yw; // Longitude of needed location
+
+                L.polyline([[xd, yd], [xw, yw]], {
                     color: connectionColor,
                     weight: 4,
                     opacity: 0.8,
                     smoothFactor: 1
                 }).addTo(map);
-            });
+        });
         })
         .catch(error => {
             console.error('Error fetching data:', error);
