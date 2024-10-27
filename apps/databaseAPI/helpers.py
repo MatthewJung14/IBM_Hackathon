@@ -531,7 +531,7 @@ def get_data_lists():
             # For wanted_item, parse x and y from item_location
             try:
                 # Use regex to extract numbers from item_location
-                coords = item.item_location.split(",")
+                coords = wanted_item.item_location.split(",")
 
                 if len(coords) >= 2:
                     xw = float(coords[0])
