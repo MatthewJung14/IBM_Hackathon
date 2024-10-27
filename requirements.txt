@@ -15,8 +15,7 @@ python-dotenv==0.19.2
 gunicorn==20.1.0
 Flask-Minify==0.37
 
-
+ibm_watsonx_ai
 kinde-python-sdk
+flask-session
 
-# flask_mysqldb
-# psycopg2-binary

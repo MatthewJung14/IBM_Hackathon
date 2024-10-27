@@ -3,14 +3,12 @@ from ibm_watsonx_ai import Credentials
 from ibm_watsonx_ai.foundation_models import ModelInference
 import json
 import re
-import textwrap
 
-api_key = "C9S_dk9_zIAAxT8YKPNI6ka2f8tXSDCO2Yef4viieCk0"
-user_input = "What is the situation like currently"
-#user_input = "I want to donate a ladder."
 
 class UserActionHandler:
-    def __init__(self, api_key, project_id, model_id="ibm/granite-3-8b-instruct", url="https://us-south.ml.cloud.ibm.com"):
+    def __init__(self,project_id="ada8a81e-64d2-4d9b-a0c3-421e15989a77",
+                 api_key = "C9S_dk9_zIAAxT8YKPNI6ka2f8tXSDCO2Yef4viieCk0",
+                 model_id="meta-llama/llama-3-1-70b-instruct", url="https://us-south.ml.cloud.ibm.com"):
         # Set up credentials and model inference instance
         credentials = Credentials(url=url, api_key=api_key)
         client = APIClient(credentials)
@@ -20,6 +18,9 @@ class UserActionHandler:
             project_id=project_id,
             params={"max_new_tokens": 100}
         )
+        self.possible_actions=["get news", "view profile", "logout",
+                               "obtain safety checklist","preview requests",
+                               "weather alerts","get/send help"]
 
     def obtain_tool_list(self, tools_file_path="tools.json"):
         with open(tools_file_path, 'r') as file:
@@ -27,20 +28,11 @@ class UserActionHandler:
         items_list = list(tools_data.keys())
         return items_list
 
-    def get_news(self):
-        with open('news.json', 'r') as file:
-            news_list = json.load(file)
-    
-        prompt = (f"Create a 20 word short summary about the news from all the titles and descriptions in the articles in the JSON files (Do not describe the json file or quote anything from it): {news_list},")
-    
-        result_paragraph = self.model.generate_text(prompt)
-        # Wrap the text to a width of 50 characters per line
-        wrapped_text = textwrap.fill(result_paragraph, width=50)
-    
-        # Print the formatted text
-        print(wrapped_text + "\nTo get more news Click <newsButton>")
-
-
+    def obtain_news_list(self, news_file_path="news.json"):
+        with open(news_file_path, 'r') as file:
+            news_data = json.load(file)
+        news_list = list(news_data.keys())
+        return news_list
 
     def obtain_JSON(self, model_output):
         json_pattern = re.search(r'\{.*\}', model_output, re.DOTALL)
@@ -88,18 +80,8 @@ class UserActionHandler:
         return self.obtain_JSON(model_output)
 
     def determine_action(self, user_request):
-        actions = [
-        "get news",
-        "view profile",
-        "logout",
-        "obtain safety checklist",
-        "preview requests",
-        "weather alerts",
-        "get/send help"
-        ]
-
+        actions = self.possible_actions
         prompt = f'''Based on the user's input, identify the action they want to take from the following list (choose answers exactly from the list):
-
         Actions:
         - {', '.join(actions)}
 
@@ -107,61 +89,43 @@ class UserActionHandler:
 
         Respond with the corresponding action only, without any additional explanations or context.
         '''
-        action = self.model.generate_text(prompt).strip()
-        print(action)
-        response_found = False
-        responses =[]
+        actions = self.model.generate_text(prompt).strip()
+        print(actions)
+        return actions
 
-        if "get news" in action:
-            print("Action identified: get news")
-            response_found = True
-            self.get_news()
-        if "view profile" in action:
-            print("Action identified: view profile")
-            response_found = True
-            # Add logic for viewing profile
-        if "logout" in action:
-            print("Action identified: logout")
-            response_found = True
-            # Add logic for logout
-        if "obtain safety checklist" in action:
-            print("Action identified: obtain safety checklist")
-            response_found = True
-            # Add logic for obtaining safety checklist
-        if "preview requests" in action:
-            print("Action identified: preview requests")
-            response_found = True
-            # Add logic for previewing requests
-        if "weather alerts" in action:
-            print("Action identified: weather alerts")
-            response_found = True
-            # Add logic for handling weather alerts
-        if "help" in action:
-            response_found = True
-            responses.append(self.extract_tools(user_request))
-            print("Action identified: get/send help")
-        if response_found == False:
-            print("Unidentified action.")
+    def parseActions(self, previous_request, action_list):
+        actions =[]
 
-        for response in responses:
-            print(response)
+        for action in self.possible_actions:
+            if action in action_list:
+                actions.append(action)
 
-        return responses
+        return actions
+
+    def generateTasks(self, user_request)->list[int,str]:
+        action_list = self.determine_action(user_request)
+        results=self.parseActions(user_request, action_list)
+        return results
 
     def get_location(self, user_request):
         prompt = f'''Based on the user's input, if there is a location, return location.
         User Input: "{user_request}"
-        Respond only with the location: "location name" and if a location was provided, or "false" if it was not. 
+        Respond only with the location in angle brackets like <Miami> or <Kmart in Miami> if a location was provided, or "false" if it was not. 
         No additional context, explanations, or code should be included.
         '''
         response = self.model.generate_text(prompt).strip()  # Get the model's response
-        print(response)
-        
-        if "false" not in response:
-            return response  # Return the extracted location
+
+        location_match = re.search(r'<([^>]+)>', response)
+
+        if location_match:
+            return location_match.group(1).strip()  # Return the extracted location
         else:
             return "No location."
 
-handler = UserActionHandler(api_key=api_key, project_id="ada8a81e-64d2-4d9b-a0c3-421e15989a77")
-response = handler.determine_action(user_input)
-#print("Response:", response)
+if __name__ == '__main__':
+
+    # user_input = "I want to donate a ladder."
+    handler = UserActionHandler()
+    user_input = "I want a generator, ladders, a few waters, and seven plastic trays. I would like to donate some Plywood. "
+    response = handler.generateTasks(user_input)
+    print(response)

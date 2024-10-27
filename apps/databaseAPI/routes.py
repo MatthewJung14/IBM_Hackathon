@@ -297,13 +297,13 @@ def list_available_items_route():
         wanted, donated = list_available_items(item_types, x, y, distance)
 
         wanted_items = [
-            {"item_type": t, "total_available": a}
-            for t, a in wanted
+            {"item_type": t, "total_available": a, "userAvailableAmounts":u}
+            for t, a,u in wanted
         ]
 
         donated_items = [
-            {"item_type": t, "total_available": a}
-            for t, a in donated
+            {"item_type": t, "total_available": a, "userAvailableAmounts":u}
+            for t, a,u in donated
         ]
 
         return jsonify({

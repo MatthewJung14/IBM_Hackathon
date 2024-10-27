@@ -43,7 +43,7 @@ def list_available_items(
     x: Optional[float] = None,
     y: Optional[float] = None,
     distance: Optional[float] = None
-) -> Tuple[List[Tuple[str, int]], List[Tuple[str, int]]]:
+) -> Tuple[List[Tuple[str, int, List[Tuple[int, str]]]], List[Tuple[str, int, List[Tuple[int, str]]]]]:
     """
     Lists available Wanted and Donated items based on item types and optional location filtering.
 
@@ -52,8 +52,8 @@ def list_available_items(
     :param y: Optional Y-coordinate for location filtering (only applies to DonatedItems).
     :param distance: Optional radius distance to include items within (only applies to DonatedItems).
     :return: Tuple containing two lists:
-             - List of tuples for WantedItems (item_type, total_available_amount)
-             - List of tuples for DonatedItems (item_type, total_available_amount)
+             - List of tuples for WantedItems (item_type, total_available_amount, [(available_amount, item_id)])
+             - List of tuples for DonatedItems (item_type, total_available_amount, [(available_amount, item_id)])
     """
     # Subquery to calculate total fulfilled for WantedItems
     fulfilled_wanted_subq = (
@@ -81,6 +81,7 @@ def list_available_items(
     wanted_query = (
         db.session.query(
             WantedItem.item_type,
+            WantedItem.id,
             (WantedItem.item_amount - func.coalesce(fulfilled_wanted_subq.c.total_fulfilled, 0)).label('available_amount')
         )
         .outerjoin(fulfilled_wanted_subq, WantedItem.id == fulfilled_wanted_subq.c.wanted_item_id)
@@ -105,10 +106,17 @@ def list_available_items(
         .all()
     )
 
+    # Query for WantedItems with item information
+    wanted_items_info = (
+        wanted_query
+        .all()
+    )
+
     # Base query for DonatedItems
     donated_query = (
         db.session.query(
             DonatedItem.item_type,
+            DonatedItem.id,
             (DonatedItem.item_amount - func.coalesce(fulfilled_donated_subq.c.total_fulfilled, 0)).label('available_amount')
         )
         .outerjoin(fulfilled_donated_subq, DonatedItem.id == fulfilled_donated_subq.c.donated_item_id)
@@ -152,6 +160,12 @@ def list_available_items(
         .all()
     )
 
+    # Query for DonatedItems with item information
+    donated_items_info = (
+        donated_query
+        .all()
+    )
+
     # Convert results to dictionaries for easy lookup
     wanted_dict = {item_type: total for item_type, total in wanted_items}
     donated_dict = {item_type: total for item_type, total in donated_items}
@@ -163,8 +177,21 @@ def list_available_items(
     for item_type in item_types:
         wanted_amount = wanted_dict.get(item_type, 0)
         donated_amount = donated_dict.get(item_type, 0)
-        wanted_result.append((item_type, wanted_amount))
-        donated_result.append((item_type, donated_amount))
+
+        wanted_items_info_list = [
+            (available_amount, item_id)
+            for item_type_, item_id, available_amount in wanted_items_info
+            if item_type_ == item_type and available_amount > 0
+        ]
+
+        donated_items_info_list = [
+            (available_amount, item_id)
+            for item_type_, item_id, available_amount in donated_items_info
+            if item_type_ == item_type and available_amount > 0
+        ]
+
+        wanted_result.append((item_type, wanted_amount, wanted_items_info_list))
+        donated_result.append((item_type, donated_amount, donated_items_info_list))
 
     return wanted_result, donated_result
 
