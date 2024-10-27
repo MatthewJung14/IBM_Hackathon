@@ -1,0 +1,199 @@
+/* static/assets/css/chatbot.css */
+
+body {
+  background-color: #f8f9fa;
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
+  padding: 0;
+  height: 100vh; /* Full viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden; /* Prevent scrolling */
+}
+
+.msger {
+  width: 400px; /* Adjusted width */
+  height: 500px; /* Adjusted height */
+  border: none;
+  background-color: #ffffff;
+  position: fixed; /* Fixed position to allow dragging */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the chatbox */
+  cursor: move; /* Indicate draggable area */
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px; /* Curved edges */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.msger-header {
+  background-color: #d5006d; /* Pink color */
+  color: white;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: grab; /* Indicate draggable area */
+  border-top-left-radius: 15px;
+  border-top-right-radius: 15px;
+}
+
+.msger-header-title {
+  font-size: 1.8rem;
+}
+
+.msger-chat {
+  flex: 1;
+  display: flex;
+  flex-direction: column; /* Stack messages vertically */
+  justify-content: flex-start; /* Start from top */
+  align-items: flex-start; /* Align messages to the left */
+  position: relative;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.msg {
+  display: flex;
+  margin: 10px 0;
+}
+
+.left-msg .msg-bubble {
+  background-color: #e9ecef;
+}
+
+.right-msg {
+  align-self: flex-end; /* Ensure user messages align to the right */
+  margin-left: 50px; /* Push messages further to the right */
+}
+
+.right-msg .msg-bubble {
+  background-color: #ffeb3b; /* User messages */
+}
+
+.left-msg {
+  align-self: flex-start;
+  margin-right: 50px; /* Balanced margin */
+}
+
+.msg-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-right: 10px;
+}
+
+.msg-bubble {
+  border-radius: 10px;
+  padding: 10px;
+  max-width: 80%;
+}
+
+.msg-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.msg-info-name {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.msg-info-time {
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.msg-text {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.msger-inputarea {
+  display: flex;
+  padding: 15px 20px;
+  border-top: 1px solid #e9ecef;
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+}
+
+.msger-input {
+  flex: 1;
+  border: 1px solid #e9ecef;
+  border-radius: 5px;
+  padding: 10px;
+  margin-right: 10px;
+  font-size: 1rem;
+}
+
+.msger-send-btn {
+  background-color: #ff69b4; /* Pink color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.msger-send-btn:hover {
+  background-color: #ff4081; /* Darker pink on hover */
+}
+
+@media (max-width: 768px) {
+  .msger {
+    width: 90%;
+    height: 80%;
+    left: 5%;
+    transform: none;
+  }
+
+  .msger-header-title {
+    font-size: 1.5rem;
+  }
+
+  .msger-send-btn {
+    padding: 10px 15px;
+    font-size: 0.9rem;
+  }
+}
+
+/* Typewriter Effect Styles */
+.typewriter {
+  font-size: 1.2rem;
+  color: #333;
+  border-right: 0.15em solid orange;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0; /* Initial width for animation */
+  animation: typing 3s steps(30, end) forwards, blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent; }
+  50% { border-color: orange; }
+}
+
+/* Additional Styles for Loading Indicator */
+.msg.left-msg.loading .msg-text::after {
+  content: '...';
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 0.2; }
+  50% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
