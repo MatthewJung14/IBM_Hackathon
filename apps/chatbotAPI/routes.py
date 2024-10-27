@@ -1,3 +1,5 @@
+import json
+
 import requests
 from flask import render_template, redirect, request, url_for, session, current_app, jsonify
 
@@ -42,8 +44,15 @@ def handle_response_task(user_id, message, task):
         return {'error': 'No pending tasks found for this user.'}, 'error'
 
     message = message.strip().lower()
-    if 'yes' not in message:
-        return {'message': 'Confirmation not received or message not recognized.'}, 'no confirmation'
+    if message == 'yes':
+        # Proceed with confirmation
+        pass
+    elif message == 'no':
+        # User declined
+        return {'text': 'Operation cancelled as per your request.'}, 'cancelled'
+    else:
+        # Message not recognized
+        return {'text': 'Confirmation not received or message not recognized.'}, 'no confirmation'
 
     # Get user location
     x, y = location_cache.get(user_id, (None, None))
@@ -100,15 +109,20 @@ def handle_response_task(user_id, message, task):
                         'wanted_items': available_wanted_items
                     }
 
+                    # Update the task in the cache
+                    cache[f"task_{user_id}"] = 'confirm donate to'
+
                     # Prepare response with available wanted items
                     return {
-                        'message': 'Donation successful. There are people requesting your items.',
+                        'text': 'Donation successful. There are people requesting your items. Please confirm with yes to donate.',
                         'wanted_items': available_wanted_items
                     }, 'confirm donate to'
                 else:
                     # No wanted items with availability greater than zero
+                    # Remove the task from cache as it's completed
+                    cache.pop(f"task_{user_id}", None)
                     return {
-                        'message': 'You have donated the items, but no one is currently requesting them.'
+                        'text': 'You have donated the items, but no one is currently requesting them.'
                     }, 'no items found'
 
             else:
@@ -160,21 +174,28 @@ def handle_response_task(user_id, message, task):
                                 find_data['closest_items']
                             ]
                         }
+                        # Update the task in the cache
+                        cache[f"task_{user_id}"] = 'confirm get from'
+
                         allocations.append({
                             'item_type': item_type,
-                            'available_items': find_data['closest_items']
+                            'available_items': find_data['closest_items'],
+                            'text': f'Great news! We found some donated {item_type} near you 🎉. We\'ll store your information and update you with more details. Thanks for using our service! 😊'
                         })
                     else:
                         allocations.append({
                             'item_type': item_type,
-                            'message': f'No donated items found for {item_type}'
+                            'text': f'Sorry, we couldn\'t find any donated {item_type} at this time 🤕. But don\'t worry, we\'ll still store your information so we can update you next time someone donates {item_type} 📣. Thanks for your patience! 😊'
                         })
                 else:
                     allocations.append({
                         'item_type': item_type,
-                        'message': f'Error finding items for {item_type}'
+                        'text': f'Error finding items for {item_type}'
                     })
             return {'allocations': allocations}, 'confirm get from'
+
+        else:
+            return {'error': 'Failed to process your request.'}, 'error'
 
     elif task == 'confirm donate to':
 
@@ -270,7 +291,11 @@ def handle_response_task(user_id, message, task):
             if response.status_code != 201:
                 return {'error': 'Failed to complete allocation.'}, 'error'
 
-        return {'message': 'Your donation has been allocated to those in need.'}, 'success'
+        # Remove the task from cache as it's completed
+        cache.pop(f"task_{user_id}", None)
+        cache.pop(f'allocation_{user_id}', None)
+
+        return {'text': 'Your donation has been allocated to those in need.'}, 'success'
 
     elif task == 'confirm get from':
         # User is confirming they want to receive items from donors
@@ -292,29 +317,33 @@ def handle_response_task(user_id, message, task):
         }
         response = requests.post(complete_request_url, json=data, headers=headers)
         if response.status_code == 201:
-            return {'message': 'Items have been allocated to you. Please contact the donor for pickup details.'}, 'success'
+            # Remove the task from cache as it's completed
+            cache.pop(f"task_{user_id}", None)
+            cache.pop(f'allocation_{user_id}', None)
+            return {'text': 'Items have been allocated to you. Please contact the donor for pickup details.'}, 'success'
         else:
             return {'error': 'Failed to complete allocation.'}, 'error'
 
     else:
-        return {'message': 'Task not handled.'}, 'error'
+        return {'text': 'Task not handled.'}, 'error'
 
     # If nothing matches
-    return {'message': 'Task not handled.'}, 'error'
+    return {'text': 'Task not handled.'}, 'error'
 
 
-def process_message(input_string: str, x: float = None, y: float = None) -> list:
+def process_message(input_string: str, x: float = None, y: float = None) -> tuple:
     """
-    Processes the input string and returns a list of tuples containing strings and integers.
+    Processes the input string and returns wanted_needed_items, responses, and task.
 
     :param input_string: The input message to process.
     :param x: Optional latitude coordinate.
     :param y: Optional longitude coordinate.
-    :return: A list of tuples, each containing a string and a string.
+    :return: A tuple containing wanted_needed_items, responses, and task.
     """
     tasks = userActionHandler.generateTasks(input_string)
     wanted_needed_items = []
     responses = []
+    task = None
 
     user_id = request.get_json().get("user_id")
     ip_address = request.remote_addr
@@ -332,25 +361,25 @@ def process_message(input_string: str, x: float = None, y: float = None) -> list
     print("Geolocation for user:", user_id, location_cache[user_id])
 
     # Process tasks and add appropriate responses
-    for task in tasks:
-        if task == "get/send help":
+    for t in tasks:
+        if t == "get/send help":
             wanted_needed_items = userActionHandler.extract_tools(input_string)
             print(wanted_needed_items)
-        elif task == "view profile":
+        elif t == "view profile":
             responses.append(
-                ("👋 Hey! Want to check out your profile or make some changes? Click here <profileLink>! 😊", task))
-        elif task == "logout":
+                ("👋 Hey! Want to check out your profile or make some changes? Click here visit your profile <profile>! 😊", t))
+        elif t == "logout":
             responses.append((
-                             "🚪 Time to log out? You can click the logout button on the left (it's the running person 🏃‍♂️) or click here <logoutLink>!",
-                             task))
-        elif task == "obtain safety checklist":
+                             "🚪 Time to log out? You can click the logout button on the left (it's the running person 🏃‍♂️) or click here to <logout>!",
+                             t))
+        elif t == "obtain safety checklist":
             responses.append((
-                             "🌟 Stay safe! Check out <safetyChecklistLink> for tips on how to keep yourself safe and sound 🙏",
-                             task))
-        elif task == "weather alerts":
+                             "🌟 Stay safe! Check out our <safety> link for tips on how to keep yourself safe and sound 🙏",
+                             t))
+        elif t == "weather alerts":
             responses.append((
-                             "⛈️ Oh no! The hurricane is still headed your way! Stay updated and check out <weatherLink> for more info 🌪️",
-                             task))
+                             "⛈️ Oh no! The hurricane is still headed your way! Stay updated and check out <weather> for more info 🌪️",
+                             t))
 
     # Process wanted/needed items
     if wanted_needed_items:
@@ -360,43 +389,45 @@ def process_message(input_string: str, x: float = None, y: float = None) -> list
                 responses.append((
                                  f"🤝 You're donating and needing items at the same time! We've got you covered. Please confirm that you want to donate {', '.join([item[0] for item in wanted_needed_items['donate']])} and need {', '.join([item[0] for item in wanted_needed_items['needs']])} at {location}. Reply with 'yes' to confirm.",
                                  "donate and need confirmation"))
+                task = "donate and need confirmation"
             else:
                 responses.append((
                                  "🚨 Error! You're donating and needing items at the same time, but you didn't include a location. Please try again with a location.",
                                  "error"))
         elif 'donate' in wanted_needed_items:
-            if location:
+            if location and location != "false":
                 responses.append((
                                  f"🎁 You're donating {', '.join([item[0] for item in wanted_needed_items['donate']])} at {location}. Please confirm by replying with 'yes'.",
                                  "donate confirmation"))
+                task = "donate confirmation"
             else:
                 responses.append((
                                  "🚨 Error! You're donating items, but you didn't include a location. Please try again with a location.",
                                  "error"))
         elif 'needs' in wanted_needed_items:
-            if location:
+            if location and location != "false":
                 responses.append((
                                  f"🤝 You need {', '.join([item[0] for item in wanted_needed_items['needs']])} at {location}. Please confirm by replying with 'yes'.",
                                  "need confirmation"))
+                task = "need confirmation"
             else:
                 responses.append((
                                  f"🤝 You need {', '.join([item[0] for item in wanted_needed_items['needs']])}. Please confirm by replying with 'yes'. You can also type your location for more accurate results.",
                                  "need confirmation"))
+                task = "need confirmation"
 
-    return wanted_needed_items, responses
+    return wanted_needed_items, responses, task
 
 
 @blueprint.route('/message', methods=['POST'])
 def handle_message():
     """
-    Endpoint to handle messages. Accepts a JSON payload with 'user_id', 'message', and optional 'task' fields.
+    Endpoint to handle messages. Accepts a JSON payload with 'user_id' and 'message' fields.
     Processes the message and returns a JSON response containing the results.
 
     Expected JSON Payload:
     {
         "user_id": "User ID here",
-        "message": "Your input string here",
-        "task": "Optional task here"
     }
 
     Responses:
@@ -410,19 +441,11 @@ def handle_message():
     if not data:
         return jsonify({"error": "Missing JSON payload"}), 400
 
-    # Retrieve the 'user_id', 'message', and 'task' fields from the JSON payload
+    # Retrieve the 'user_id' and 'message' fields from the JSON payload
     user_id = data.get('user_id')
     message = data.get('message')
-    task = data.get('task')  # This is optional
     x = data.get('x')  # Optional latitude
     y = data.get('y')  # Optional longitude
-
-    # If 'task' is provided, call handle_response_task
-    if task:
-        result=handle_response_task(user_id, message, task)
-        return jsonify(result)
-    else:
-        cache_retrieved = None
 
     # Validate user_id and message
     if not user_id or not isinstance(user_id, str) or not user_id.strip():
@@ -431,29 +454,47 @@ def handle_message():
         return jsonify({"error": "Invalid or missing 'message'"}), 400
 
     try:
-        # Process the message with optional coordinates
-        wants_needs_items, processed_data = process_message(message, x, y)
+        # Check if message is a confirmation
+        if message.strip().lower() in ['yes', 'no']:
+            # Get the last task from cache
+            last_task = cache.get(f"task_{user_id}")
+            if last_task:
+                # Handle response task
+                result, status = handle_response_task(user_id, message, last_task)
+                # If a new task is returned, update it in the cache
+                if status in ['confirm donate to', 'confirm get from']:
+                    cache[f"task_{user_id}"] = status
+                    result['results'] = result["allocations"]  # 重命名 allocations 為 results
+                    createdjson=json.dumps(result, indent=4)
+                    print(createdjson)  # 輸出 JSON 數據
+                    return jsonify(result), 200
+                else:
+                    # Remove the task from cache if completed or cancelled
+                    cache.pop(f"task_{user_id}", None)
+                    print(json.dumps(result, indent=4))  # 輸出 JSON 數據
+                    return jsonify(result), 200
+            else:
+                # No task to confirm
+                error_message = {"text": "No pending tasks to confirm."}
+                print(json.dumps(error_message, indent=4))  # 輸出 JSON 數據
+                return jsonify(error_message), 200
+        else:
+            # Process the message with optional coordinates
+            wants_needs_items, processed_data, task = process_message(message, x, y)
 
-        # Validate the processed data format
-        if not isinstance(processed_data, list):
-            return jsonify({"error": "Processed data is not a list"}), 500
-        for item in processed_data:
-            if not (isinstance(item, tuple) and len(item) == 2):
-                return jsonify({"error": "Each item in processed data must be a tuple of (string, string)"}), 500
+            # Store the task in cache if needed
+            if task:
+                cache[f"task_{user_id}"] = task
+                # Also store wanted_needed_items
+                cache[user_id] = wants_needs_items
 
-        # Store wanted_needed_items in cache associated with user_id
-        if wants_needs_items:
-            cache[user_id] = wants_needs_items
+            # Structure the response data
+            response = {
+                "status": "Message processed successfully",
+                "results": [{"text": text, "type": type} for text, type in processed_data]
+            }
 
-        # Structure the response data
-        response = {
-            "status": "Message processed successfully",
-            "results": [{"text": text, "type": type} for text, type in processed_data]
-        }
-        if cache_retrieved is not None:
-            response['cache_retrieved'] = cache_retrieved
-
-        return jsonify(response), 200
+            return jsonify(response), 200
 
     except Exception as e:
         current_app.logger.error(f"Error processing message: {str(e)}")
@@ -468,11 +509,11 @@ def route_default():
     available_actions = {
         "available_actions": [
             {
-                "endpoint": "/message",
+                "endpoint": "/chat/message",
                 "method": "POST",
                 "description": "Send a message and receive processed responses.",
                 "payload": {
-                    "message": "string (The input message to process)"
+                    "text": "string (The input message to process)"
                 },
                 "responses": {
                     "200": {
