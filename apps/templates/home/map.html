@@ -78,9 +78,9 @@
     fetch('http://localhost:5000/api/data-list')
         .then(response => response.json())
         .then(data => {
-            const donationList = data.donationList;
-            const neededList = data.neededList;
-            const connectList = data.connectList;
+            const donationList = data.donated_items;
+            const neededList = data.item_links;
+            const connectList = data.connected_items;
 
             const locationsInstance = new Locations(donationList, neededList, connectList);
             const donationLocations = locationsInstance.getDonationLocations();
