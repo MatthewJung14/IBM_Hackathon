@@ -1,5 +1,5 @@
 
-from typing import List, Tuple, Optional
+from typing import List, Tuple, Optional, re
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
@@ -475,3 +475,81 @@ def complete_request(
         raise e
 
     return created_links
+
+
+def get_data_lists():
+    """
+    Retrieves lists of donated items, wanted items, and item links with coordinate pairs.
+    """
+    session: Session = db.session
+    try:
+        # Get all DonatedItems
+        donated_items = session.query(DonatedItem).all()
+        donated_items_data = [
+            {
+                "item_type": item.item_type,
+                "x": item.x,
+                "y": item.y,
+                "item_amount": item.item_amount
+            }
+            for item in donated_items
+        ]
+
+        # Get all WantedItems
+        wanted_items = session.query(WantedItem).all()
+        wanted_items_data = []
+        for item in wanted_items:
+            # Parse x and y from item_location
+            try:
+                # Use regex to extract numbers from item_location
+                coords = item.item_location.split(",")
+
+                if len(coords) >= 2:
+                    x = float(coords[0])
+                    y = float(coords[1])
+                else:
+                    x = 28.105275395664243
+                    y = -82.37907792923211
+            except Exception:
+                x = None
+                y = None
+            wanted_items_data.append({
+                "item_type": item.item_type,
+                "x": x,
+                "y": y,
+                "item_amount": item.item_amount
+            })
+
+        # Get all ItemLinks and extract coordinate pairs
+        item_links = session.query(ItemLink).all()
+        item_links_data = []
+        for link in item_links:
+            donated_item = link.donated_item
+            wanted_item = link.wanted_item
+            xd = donated_item.x
+            yd = donated_item.y
+            # For wanted_item, parse x and y from item_location
+            try:
+                # Use regex to extract numbers from item_location
+                coords = item.item_location.split(",")
+
+                if len(coords) >= 2:
+                    xw = float(coords[0])
+                    yw = float(coords[1])
+                else:
+                    xw = 28.105275395664243
+                    yw = -82.37907792923211
+            except Exception:
+                xw = None
+                yw = None
+            item_links_data.append({
+                "xd": xd,
+                "yd": yd,
+                "xw": xw,
+                "yw": yw
+            })
+
+        return donated_items_data, wanted_items_data, item_links_data
+
+    except Exception as e:
+        raise e

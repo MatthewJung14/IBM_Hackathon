@@ -25,6 +25,15 @@ class WantedItem(db.Model):
     # Relationship to ItemLinks
     links = relationship('ItemLink', back_populates='wanted_item', cascade="all, delete-orphan")
 
+
+    @property
+    def amount_fulfilled(self):
+        return sum(link.amount_fulfilled for link in self.links)
+
+    @property
+    def amount_remaining(self):
+        return self.item_amount - self.amount_fulfilled
+
     def __repr__(self):
         return f"WantedItem(id={self.id}, type={self.item_type}, amount={self.item_amount})"
 
@@ -44,6 +53,14 @@ class DonatedItem(db.Model):
 
     # Relationship to ItemLinks
     links = relationship('ItemLink', back_populates='donated_item', cascade="all, delete-orphan")
+
+    @property
+    def amount_fulfilled(self):
+        return sum(link.amount_fulfilled for link in self.links)
+
+    @property
+    def amount_remaining(self):
+        return self.item_amount - self.amount_fulfilled
 
     def __repr__(self):
         return f"DonatedItem(id={self.id}, type={self.item_type}, amount={self.item_amount}, location=({self.x}, {self.y}))"

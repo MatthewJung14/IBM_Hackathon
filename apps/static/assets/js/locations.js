@@ -1,28 +1,36 @@
 class Locations {
     donationLocations = [];
     neededLocations = [];
+    connections = [];
 
-    constructor(donationLocations, neededLocations) {
+    constructor(donationLocations, neededLocations, connections) {
         this.donationLocations = donationLocations || [];
         this.neededLocations = neededLocations || [];
+        this.connections = connections || [];
     }
 
     getDonationLocations() {
-        console.log(this.donationLocations);
         return this.donationLocations;
     }
 
     getNeededLocations() {
-        console.log(this.neededLocations);
         return this.neededLocations;
     }
 
-    addDonationLocation(location) {
-        this.donationLocations.push(location);
+    getConnectionLocations() {
+        return this.connections;
     }
 
-    addNeededLocation(location) {
-        this.neededLocations.push(location);
+    addDonationLocation(location, coords) {
+        this.donationLocations.push(location, coords);
+    }
+
+    addNeededLocation(location, coords) {
+        this.neededLocations.push(location, coords);
+    }
+
+    addConnection(coords1, coords2) {
+        this.connections.push(coords1, coords2);
     }
 
     findLocationByName(name) {
