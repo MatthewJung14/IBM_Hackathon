@@ -59,62 +59,89 @@
     });
 
     // Testing list
-    const donationList = [
-        { name: "Food Bank Miami", coords: [25.7617, -80.1918] },
-        { name: "Habitat for Humanity Tampa", coords: [27.9506, -82.4572] },
-        { name: "Community Foundation Jacksonville", coords: [30.3322, -81.6557] }
-    ];
+    // const donationList = [
+    //     { item_amount: 1, item_type: "Water",  x: 25.7617, y: -80.1918},
+    //     { item_amount:2, item_type: "Food",  x: 27.9506, y: -82.4572 },
+    //     { item_amount: 1, item_type: "Generator",  x: 30.3322, y: -81.6557 }
+    // ];
+    // const neededList = [
+    //     { item_amount: 1, item_type: "Ladder",  x: 28.5383, y: -81.3792 },
+    //     { item_amount: 1, item_type: "Dry Ice",  x: 27.3369, y: -82.5333 },
+    //     { item_amount: 1,item_type: "Shovel",  x: 29.6516, y: -82.3248 }
+    // ];
+    // const connectList = [
+    //     { donationCoords: [30.3322, -81.6557], neeededCoords: [29.6516, -82.3248] },
+    //     { donationCoords: [27.9506, -82.4572], neeededCoords: [27.3369, -82.5333] }
+    // ];
 
-    const neededList = [
-        { name: "Shelter Orlando", coords: [28.5383, -81.3792] },
-        { name: "Assistance League Sarasota", coords: [27.3369, -82.5333] },
-        { name: "Red Cross Gainesville", coords: [29.6516, -82.3248] }
-    ];
+    // Fetch data from the API
+    fetch('http://localhost:5000/api/data-list')
+        .then(response => response.json())
+        .then(data => {
+            const donationList = data.donationList;
+            const neededList = data.neededList;
+            const connectList = data.connectList;
 
-    // Donation and needed locations
-    const locationsInstance = new Locations(donationList, neededList);
-    const donationLocations = locationsInstance.getDonationLocations();
-    const neededLocations = locationsInstance.getNeededLocations();
+            const locationsInstance = new Locations(donationList, neededList, connectList);
+            const donationLocations = locationsInstance.getDonationLocations();
+            const neededLocations = locationsInstance.getNeededLocations();
+            const connectedLocations = locationsInstance.getConnectionLocations();
 
-    // Define custom colors for the icons
-    const neededColour = '#E3242B';  // Red for needed locations
-    const donationColour = '#1E90FF'; // Blue for donation locations
+            // Define custom colors for the icons
+            const neededColour = '#E3242B';  // Red for needed locations
+            const donationColour = '#1E90FF'; // Blue for donation locations
+            const connectionColor = '#800080'; // Purple for connected locations
 
-    // Create icon styles for each type
-    const createIcon = (color) => {
-        return L.divIcon({
-            className: "my-custom-pin",
-            iconAnchor: [0, 12],
-            labelAnchor: [-6, 0],
-            popupAnchor: [0, -36],
-            html: `
-                <span style="
-                    background-color: ${color};
-                    width: 2rem;
-                    height: 2rem;
-                    display: block;
-                    left: -1rem;
-                    top: -1rem;
-                    position: relative;
-                    border-radius: 2rem 2rem 0;
-                    transform: rotate(45deg);
-                    border: 1px solid #FFFFFF">
-                </span>`
+            // Create icon styles for each type
+            const createIcon = (color) => {
+                return L.divIcon({
+                    className: "my-custom-pin",
+                    iconAnchor: [0, 12],
+                    labelAnchor: [-6, 0],
+                    popupAnchor: [0, -36],
+                    html: `
+                        <span style="
+                            background-color: ${color};
+                            width: 2rem;
+                            height: 2rem;
+                            display: block;
+                            left: -1rem;
+                            top: -1rem;
+                            position: relative;
+                            border-radius: 2rem 2rem 0;
+                            transform: rotate(45deg);
+                            border: 1px solid #FFFFFF">
+                        </span>`
+                });
+            };
+
+            // Add donation markers to the map with blue icon
+            donationLocations.forEach(location => {
+                L.marker([location.x, location.y], { icon: createIcon(donationColour) })
+                    .addTo(map)
+                    .bindPopup(`<b>Item:</b> ${location.item_type}<br><b>Amount:</b> ${location.item_amount}`);
+            });
+
+            // Add needed markers to the map with red icon
+            neededLocations.forEach(location => {
+                L.marker([location.x, location.y], { icon: createIcon(neededColour) })
+                    .addTo(map)
+                    .bindPopup(`<b>Item:</b> ${location.item_type}<br><b>Amount:</b> ${location.item_amount}`);
+            });
+
+            // Draw lines between connected locations
+            connectedLocations.forEach(connection => {
+                L.polyline([connection.donationCoords, connection.neededCoords], {
+                    color: connectionColor,
+                    weight: 4,
+                    opacity: 0.8,
+                    smoothFactor: 1
+                }).addTo(map);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
         });
-    };
 
-    // Add donation markers to the map with blue icon
-    donationLocations.forEach(location => {
-        L.marker(location.coords, { icon: createIcon(donationColour) })
-            .addTo(map)
-            .bindPopup(location.name);
-    });
-
-    // Add needed markers to the map with red icon
-    neededLocations.forEach(location => {
-        L.marker(location.coords, { icon: createIcon(neededColour) })
-            .addTo(map)
-            .bindPopup(location.name);
-    });
 </script>
 {% endblock javascripts %}
