@@ -1,6 +1,9 @@
 import requests
 from flask import render_template, redirect, request, url_for, session, current_app, jsonify
+
+from apps import db
 from apps.chatbotAPI import blueprint
+from apps.databaseAPI.models import DonatedItem
 from apps.prompts.prompts import UserActionHandler
 
 userActionHandler = UserActionHandler()
@@ -174,39 +177,100 @@ def handle_response_task(user_id, message, task):
             return {'allocations': allocations}, 'confirm get from'
 
     elif task == 'confirm donate to':
+
         # User is confirming they want to allocate their donation to specific requests
+
         allocation_data = cache.get(f'allocation_{user_id}')
+
         if not allocation_data:
             return {'error': 'No allocation data found.'}, 'error'
 
         donated_item_ids = allocation_data.get('donated_item_ids')
+
         wanted_items = allocation_data.get('wanted_items')
 
         if not donated_item_ids or not wanted_items:
             return {'error': 'Incomplete allocation data.'}, 'error'
 
         # Prepare allocations
-        allocations = []
-        for wanted_item in wanted_items:
-            wanted_item_id = wanted_item['id']
-            item_type = wanted_item['item_type']
-            total_available = wanted_item['total_available']
 
-            # For simplicity, allocate from the first donated item
-            donated_item_id = donated_item_ids[0]
-            allocations.append([donated_item_id, total_available])
+        allocations = []
+
+        remaining_donation = 0
+
+        # Get the total available donation
+
+        list_items_url = url_for('databaseAPI_blueprint.list_available_items_route', _external=True)
+
+        item_types = [wanted_items[0]['item_type']]
+
+        params = [('item_types', it) for it in item_types]
+
+        list_response = requests.get(list_items_url, params=params)
+
+        if list_response.status_code == 200:
+
+            list_data = list_response.json()
+
+            donated_items = list_data.get('donated_items', [])
+
+            if donated_items:
+                remaining_donation = donated_items[0].get('total_available', 0)
+
+        for wanted_item in wanted_items:
+            item_type = wanted_item['item_type']
+
+            # Search the database for donated items with matching item type
+            donated_item_query = (
+                db.session.query(DonatedItem)
+                .filter(DonatedItem.id.in_(donated_item_ids), DonatedItem.item_type == item_type)
+                .all()
+            )
+
+            if donated_item_query:
+                donated_item_amount = donated_item_query[0].item_amount
+            else:
+                continue
+
+            user_wanted_amounts = wanted_item.get('userAvailableAmounts', [])
+
+            # Sort user available amounts in descending order
+            user_wanted_amounts.sort(key=lambda x: x[0], reverse=True)
+
+            for wanted_amount, item_id  in user_wanted_amounts:
+                allocate_amount = min(wanted_amount, donated_item_amount)
+
+                if allocate_amount > 0:
+                    allocations.append([donated_item_ids[0], item_id, allocate_amount])
+
+                    donated_item_amount -= allocate_amount
+
+                    if donated_item_amount == 0:
+                        break
+
+            if remaining_donation == 0:
+                break
 
         # Prepare data for /complete-request
+
         complete_request_url = url_for('databaseAPI_blueprint.complete_request_route', _external=True)
-        data = {
-            'wanted_item_id': wanted_items[0]['id'],  # Assuming only one wanted item for simplicity
-            'allocations': allocations
-        }
-        response = requests.post(complete_request_url, json=data, headers=headers)
-        if response.status_code == 201:
-            return {'message': 'Your donation has been allocated to those in need.'}, 'success'
-        else:
-            return {'error': 'Failed to complete allocation.'}, 'error'
+
+        for allocation in allocations:
+
+            data = {
+
+                'wanted_item_id': allocation[1],
+
+                'allocations': [[allocation[0], allocation[2]]]
+
+            }
+
+            response = requests.post(complete_request_url, json=data, headers=headers)
+
+            if response.status_code != 201:
+                return {'error': 'Failed to complete allocation.'}, 'error'
+
+        return {'message': 'Your donation has been allocated to those in need.'}, 'success'
 
     elif task == 'confirm get from':
         # User is confirming they want to receive items from donors
