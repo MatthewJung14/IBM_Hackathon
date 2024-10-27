@@ -31,8 +31,9 @@ def route_template(template):
         given_name= user.get('given_name')
         family_name= user.get('family_name')
         user_email = user.get('email')
+        user_id = user.get('id')
         # Serve the file (if exists) from app/templates/home/FILE.html
-        return render_template("home/" + template, segment=segment, profile_picture=profile_picture, given_name=given_name, family_name=family_name, user_email=user_email)
+        return render_template("home/" + template,user_id=user_id, segment=segment, profile_picture=profile_picture, given_name=given_name, family_name=family_name, user_email=user_email)
 
     except TemplateNotFound:
         return render_template('home/page-404.html'), 404
