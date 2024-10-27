@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Florida Map with Markers</title>
+    <title>Florida Map with Geolocation and Markers</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
         integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14="
         crossorigin=""/>
@@ -15,15 +15,13 @@
         #map { height: 500px; }
     </style>
 </head>
-<body data-rsssl=1>
+<body>
 
 <main>
     <div id="map"></div>
 </main>
 
-<script type="module">
-    import Locations from './locations.js';
-
+<script>
     const map = L.map('map').setView([27.9944024, -81.7602544], 7); // Centered on Florida
 
     // Map tile layer
@@ -32,32 +30,62 @@
         attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
-    // Marker options for different colors
-    const donationIcon = new L.Icon({
-        iconUrl: 'https://cdn.mapmarker.io/api/v1/pin?size=50&background=%23ff0000&icon=fa-map-marker&color=%23ffffff',
-        iconSize: [30, 30],
-        iconAnchor: [15, 30]
+    // Donation and needed locations
+    const donationLocations = [
+        { name: "Food Bank Miami", coords: [25.7617, -80.1918] },
+        { name: "Habitat for Humanity Tampa", coords: [27.9506, -82.4572] },
+        { name: "Community Foundation Jacksonville", coords: [30.3322, -81.6557] }
+    ];
+
+    const neededLocations = [
+        { name: "Shelter Orlando", coords: [28.5383, -81.3792] },
+        { name: "Assistance League Sarasota", coords: [27.3369, -82.5333] },
+        { name: "Red Cross Gainesville", coords: [29.6516, -82.3248] }
+    ];
+
+    // Add donation markers to the map
+    donationLocations.forEach(location => {
+        L.marker(location.coords)
+            .addTo(map)
+            .bindPopup(location.name)
+            .openPopup();
     });
 
-    const neededIcon = new L.Icon({
-        iconUrl: 'https://cdn.mapmarker.io/api/v1/pin?size=50&background=%230000ff&icon=fa-map-marker&color=%23ffffff',
-        iconSize: [30, 30],
-        iconAnchor: [15, 30]
-    });
-
-    // Get donation locations and add them to the map
-    const locations = Locations.getDonationLocations();
-    locations.forEach(location => {
-        L.marker(location.coords, { icon: donationIcon }).addTo(map)
-            .bindPopup(location.name);
-    });
-
-    // Get needed locations and add them to the map
-    const neededLocations = Locations.getNeededLocations();
+    // Add needed markers to the map
     neededLocations.forEach(location => {
-        L.marker(location.coords, { icon: neededIcon }).addTo(map)
-            .bindPopup(location.name);
+        L.marker(location.coords)
+            .addTo(map)
+            .bindPopup(location.name)
+            .openPopup();
     });
+
+    // // Geolocation
+    // let marker, circle;
+    // navigator.geolocation.watchPosition(success, error);
+
+    // function success(pos) {
+    //     const lat = pos.coords.latitude;
+    //     const lng = pos.coords.longitude;
+    //     const accuracy = pos.coords.accuracy;
+
+    //     if (marker) {
+    //         map.removeLayer(marker);
+    //         map.removeLayer(circle);
+    //     }
+
+    //     marker = L.marker([lat, lng]).addTo(map);
+    //     circle = L.circle([lat, lng], { radius: accuracy }).addTo(map);
+
+    //     map.setView([lat, lng], 13); // Update view to current location
+    // }
+
+    // function error(err) {
+    //     if (err.code === 1) {
+    //         alert("Please allow geolocation access.");
+    //     } else {
+    //         alert("Cannot get current location.");
+    //     }
+    // }
 </script>
 
 </body>
