@@ -6,7 +6,9 @@ import re
 
 
 class UserActionHandler:
-    def __init__(self,project_id="ada8a81e-64d2-4d9b-a0c3-421e15989a77", api_key = "C9S_dk9_zIAAxT8YKPNI6ka2f8tXSDCO2Yef4viieCk0", model_id="ibm/granite-3-8b-instruct", url="https://us-south.ml.cloud.ibm.com"):
+    def __init__(self,project_id="ada8a81e-64d2-4d9b-a0c3-421e15989a77",
+                 api_key = "C9S_dk9_zIAAxT8YKPNI6ka2f8tXSDCO2Yef4viieCk0",
+                 model_id="meta-llama/llama-3-1-70b-instruct", url="https://us-south.ml.cloud.ibm.com"):
         # Set up credentials and model inference instance
         credentials = Credentials(url=url, api_key=api_key)
         client = APIClient(credentials)
@@ -108,13 +110,13 @@ class UserActionHandler:
     def get_location(self, user_request):
         prompt = f'''Based on the user's input, if there is a location, return location.
         User Input: "{user_request}"
-        Respond only with the location if a location was provided, or "false" if it was not. 
+        Respond only with the location in angle brackets like <Miami> or <Kmart in Miami> if a location was provided, or "false" if it was not. 
         No additional context, explanations, or code should be included.
         '''
         response = self.model.generate_text(prompt).strip()  # Get the model's response
 
-        location_match = re.search(r'\b(?:in|at|located in)\s*([A-Z][a-zA-Z\s]+)', response)
-        
+        location_match = re.search(r'<([^>]+)>', response)
+
         if location_match:
             return location_match.group(1).strip()  # Return the extracted location
         else:
