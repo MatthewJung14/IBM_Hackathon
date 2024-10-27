@@ -38,8 +38,8 @@ class DonatedItem(Base):
     item_type = Column(String(128), nullable=False)
     item_amount = Column(Integer, nullable=False)
     item_location = Column(String(256), nullable=False)
-    x = Column(Float, nullable=False)  # X-coordinate
-    y = Column(Float, nullable=False)  # Y-coordinate
+    x = Column(Float, nullable=False)  # X-coordinate (latitude)
+    y = Column(Float, nullable=False)  # Y-coordinate (longitude)
     is_available = Column(Boolean, default=True, nullable=False)
 
     # Relationship to ItemLinks
@@ -69,7 +69,7 @@ DATABASE_URL = Config.SQLALCHEMY_DATABASE_URI
 
 # Set up the database engine and session
 try:
-    engine = create_engine(DATABASE_URL, echo=True)
+    engine = create_engine(DATABASE_URL, echo=False)  # Set echo=False to reduce output
     Session = sessionmaker(bind=engine)
     session = Session()
 except OperationalError as e:
@@ -140,6 +140,12 @@ def random_point_around(lat, lon, radius_km):
 
     return new_lat, new_lon
 
+# Function to calculate distance in degrees between two points
+def distance_in_degrees(lat1, lon1, lat2, lon2):
+    delta_lat = lat1 - lat2
+    delta_lon = lon1 - lon2
+    return math.sqrt(delta_lat**2 + delta_lon**2)
+
 # Generate user IDs
 user_ids = [f'user_{i}' for i in range(1, 21)]
 
@@ -207,12 +213,17 @@ try:
     for wanted_item in wanted_items:
         # Initialize amount_remaining for wanted_item
         wanted_amount_remaining = wanted_item.item_amount
+        # Extract wanted_item's latitude and longitude
+        wanted_lat_str, wanted_lon_str = wanted_item.item_location.split(',')
+        wanted_lat = float(wanted_lat_str)
+        wanted_lon = float(wanted_lon_str)
         # While the wanted item still needs fulfillment
         while wanted_amount_remaining > 0 and wanted_item.is_available:
-            # Find DonatedItems with matching item_type and is_available
+            # Find DonatedItems with matching item_type, is_available, amount_remaining > 0, and within 0.8 degrees
             matching_donated_items = [
                 d for d in donated_items
                 if d.item_type == wanted_item.item_type and d.is_available and d.amount_remaining > 0
+                and distance_in_degrees(wanted_lat, wanted_lon, d.x, d.y) <= 0.5
             ]
 
             if not matching_donated_items:
