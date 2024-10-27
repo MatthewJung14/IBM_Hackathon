@@ -9,7 +9,7 @@ from apps.databaseAPI.helpers import (
     wantListofItems,
     complete_request,
     list_available_items,
-    find_closest_items
+    find_closest_items, get_data_lists
 )
 
 
@@ -358,7 +358,21 @@ def find_closest_items_route():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@blueprint.route('/data-lists', methods=['GET'])
+def data_lists():
+    """
+    Endpoint to return lists of donated items, wanted items, and item links with coordinates.
+    """
+    try:
+        donated_items_data, wanted_items_data, item_links_data = get_data_lists()
 
+        return jsonify({
+            "donated_items": donated_items_data,
+            "wanted_items": wanted_items_data,
+            "item_links": item_links_data
+        }), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @blueprint.errorhandler(403)
 def access_forbidden(error):

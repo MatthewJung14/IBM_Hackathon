@@ -197,3 +197,19 @@ body {
   50% { opacity: 1; }
   100% { opacity: 0.2; }
 }
+
+/* Link Styling */
+.msg-text a {
+  color: #1e90ff; /* DodgerBlue */
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.msg-text a:hover {
+  text-decoration: underline;
+}
+
+.msg-text a:focus {
+  outline: 2px dashed #1e90ff;
+  outline-offset: 2px;
+}
