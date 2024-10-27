@@ -1,56 +1,79 @@
-<!-- templates/home/chatbot.html -->
-
 {% extends "layouts/base.html" %}
 
-{% block title %}Chatbot{% endblock %}
+{% block title %}Dashboard with Map and Chatbot{% endblock %}
 
 {% block stylesheets %}
-<!-- Link to the external CSS file -->
+<!-- Leaflet map and chatbot stylesheets -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.2/dist/leaflet.css"
+    integrity="sha256-sA+zWATbFveLLNqWO2gtiw3HL/lh1giY/Inf1BJ0z14=" crossorigin=""/>
+<link rel="stylesheet" href="{{ url_for('static', filename='assets/css/florida_map.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/chatbot.css') }}">
 {% endblock stylesheets %}
 
 {% block content %}
-<div class="container-fluid py-4">
-  <div class="row justify-content-center">
-    <section class="msger">
-      <header class="msger-header">
-        <div class="msger-header-title">
-          <i class="fas fa-comment-alt"></i> Find My Relief
+<div class="container py-4">
+    <div class="card transparent-container">
+        <div class="card-body">
+            <div class="row">
+                <!-- Chatbot Card -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 transparent-container">
+                        <div class="card-body">
+                            <section class="msger">
+                                <header class="msger-header">
+                                    <div class="msger-header-title">
+                                        <i class="fas fa-comment-alt"></i> Find My Relief
+                                    </div>
+                                </header>
+
+                                <main class="msger-chat">
+                                    <!-- Typewriter message will be inserted here via JavaScript -->
+                                </main>
+
+                                <form class="msger-inputarea">
+                                    <input type="text" class="msger-input" placeholder="Enter your message..." />
+                                    <input type="file" id="file-input" style="display: none;" />
+                                    <button type="button" id="file-upload-btn" class="msger-send-btn">📎</button>
+                                    <button type="submit" class="msger-send-btn">Send</button>
+                                </form>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Card -->
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">Florida Map with Geolocation and Markers</h5>
+                            <div id="map"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- Gear icon removed as per instructions -->
-      </header>
+    </div>
 
-      <main class="msger-chat">
-        <!-- Typewriter message will be inserted here via JavaScript -->
-      </main>
+    <!-- Embed user data as data attributes -->
+    <div id="user-data"
+         data-user-id="{{ user_id }}"
+         data-profile-picture="{{ profile_picture }}"
+         data-given-name="{{ given_name }}"
+         data-family-name="{{ family_name }}"
+         data-user-email="{{ user_email }}">
+    </div>
 
-      <form class="msger-inputarea">
-        <input type="text" class="msger-input" placeholder="Enter your message..." />
-        <input type="file" id="file-input" style="display: none;" />
-        <button type="button" id="file-upload-btn" class="msger-send-btn">📎</button>
-        <button type="submit" class="msger-send-btn">Send</button>
-      </form>
-    </section>
-  </div>
-
-  <!-- Embed user data as data attributes -->
-  <div id="user-data"
-       data-user-id="{{ user_id }}"
-       data-profile-picture="{{ profile_picture }}"
-       data-given-name="{{ given_name }}"
-       data-family-name="{{ family_name }}"
-       data-user-email="{{ user_email }}">
-  </div>
-
-  {% include 'includes/footer.html' %}
+    {% include 'includes/footer.html' %}
 </div>
 {% endblock content %}
 
 {% block javascripts %}
-<!-- Include interact.js from CDN -->
+<!-- Leaflet map, chatbot, and other scripts -->
+<script src="https://unpkg.com/leaflet@1.9.2/dist/leaflet.js"
+    integrity="sha256-o9N1jGDZrf5tS+Ft4gbIK7mYMipq9lqpVJ91xHSyKhg=" crossorigin=""></script>
 <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
-<!-- Include Font Awesome JS if using Font Awesome Icons -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-<!-- Link to the external JS file -->
+<script src="{{ url_for('static', filename='assets/js/locations.js') }}"></script>
+<script src="{{ url_for('static', filename='assets/js/florida_map.js') }}"></script>
 <script src="{{ url_for('static', filename='assets/js/chatbot.js') }}"></script>
 {% endblock javascripts %}
