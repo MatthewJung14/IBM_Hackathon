@@ -21,7 +21,8 @@
     <div id="map"></div>
 </main>
 
-<script>
+<script type="module">
+    import Locations from './locations.js'
     const map = L.map('map').setView([27.9944024, -81.7602544], 7); // Centered on Florida
 
     // Map tile layer
@@ -30,62 +31,70 @@
         attribution: '© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
 
-    // Donation and needed locations
-    const donationLocations = [
+    const redIcon = new L.Icon({
+        iconUrl: '../../static/assets/img/location_11970459.png',
+        iconSize: [30, 33],
+        iconAnchor: [15, 30]
+    });
+
+    // Testing list
+    const donationList = [
         { name: "Food Bank Miami", coords: [25.7617, -80.1918] },
         { name: "Habitat for Humanity Tampa", coords: [27.9506, -82.4572] },
         { name: "Community Foundation Jacksonville", coords: [30.3322, -81.6557] }
     ];
 
-    const neededLocations = [
+    const neededList = [
         { name: "Shelter Orlando", coords: [28.5383, -81.3792] },
         { name: "Assistance League Sarasota", coords: [27.3369, -82.5333] },
         { name: "Red Cross Gainesville", coords: [29.6516, -82.3248] }
     ];
 
-    // Add donation markers to the map
+    // Donation and needed locations
+    const locationsInstance = new Locations(donationList, neededList);
+    const donationLocations = locationsInstance.getDonationLocations();
+    const neededLocations = locationsInstance.getNeededLocations();
+
+    // Define custom colors for the icons
+    const neededColour = '#E3242B';  // Red for needed locations
+    const donationColour = '#1E90FF'; // Blue for donation locations
+
+    // Create icon styles for each type
+    const createIcon = (color) => {
+        return L.divIcon({
+            className: "my-custom-pin",
+            iconAnchor: [0, 12],
+            labelAnchor: [-6, 0],
+            popupAnchor: [0, -36],
+            html: `
+                <span style="
+                    background-color: ${color};
+                    width: 2rem;
+                    height: 2rem;
+                    display: block;
+                    left: -1rem;
+                    top: -1rem;
+                    position: relative;
+                    border-radius: 2rem 2rem 0;
+                    transform: rotate(45deg);
+                    border: 1px solid #FFFFFF">
+                </span>`
+        });
+    };
+
+    // Add donation markers to the map with blue icon
     donationLocations.forEach(location => {
-        L.marker(location.coords)
+        L.marker(location.coords, { icon: createIcon(donationColour) })
             .addTo(map)
-            .bindPopup(location.name)
-            .openPopup();
+            .bindPopup(location.name);
     });
 
-    // Add needed markers to the map
+    // Add needed markers to the map with red icon
     neededLocations.forEach(location => {
-        L.marker(location.coords)
+        L.marker(location.coords, { icon: createIcon(neededColour) })
             .addTo(map)
-            .bindPopup(location.name)
-            .openPopup();
+            .bindPopup(location.name);
     });
-
-    // // Geolocation
-    // let marker, circle;
-    // navigator.geolocation.watchPosition(success, error);
-
-    // function success(pos) {
-    //     const lat = pos.coords.latitude;
-    //     const lng = pos.coords.longitude;
-    //     const accuracy = pos.coords.accuracy;
-
-    //     if (marker) {
-    //         map.removeLayer(marker);
-    //         map.removeLayer(circle);
-    //     }
-
-    //     marker = L.marker([lat, lng]).addTo(map);
-    //     circle = L.circle([lat, lng], { radius: accuracy }).addTo(map);
-
-    //     map.setView([lat, lng], 13); // Update view to current location
-    // }
-
-    // function error(err) {
-    //     if (err.code === 1) {
-    //         alert("Please allow geolocation access.");
-    //     } else {
-    //         alert("Cannot get current location.");
-    //     }
-    // }
 </script>
 
 </body>
